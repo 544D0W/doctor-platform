@@ -1,0 +1,404 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { Bell, Brain, ArrowRight, AlertCircle } from 'lucide-react';
+import { getAIDiagnosis } from '@/services/aiService';
+import type { EmergencyRequest, Message } from '@/types';
+
+// Mock data with full patient details
+const mockRequests: EmergencyRequest[] = [
+  {
+    id: '1',
+    patient: {
+      id: '101',
+      name: 'John Doe',
+      age: 45,
+      gender: 'Male',
+      condition: 'Chest Pain',
+      vitals: {
+        heartRate: '95 bpm',
+        bloodPressure: '140/90',
+        oxygenSaturation: '97%',
+        temperature: '37.5°C'
+      },
+      medicalHistory: {
+        conditions: ['Hypertension', 'Type 2 Diabetes'],
+        allergies: ['Penicillin'],
+        medications: ['Metformin', 'Lisinopril'],
+        previousHospitalizations: [
+          {
+            date: '2024-01-15',
+            reason: 'High Blood Pressure'
+          }
+        ]
+      }
+    },
+    timestamp: new Date().toISOString(),
+    status: 'pending',
+    priority: 'high',
+    location: '123 Emergency St'
+  },
+  {
+    id: '2',
+    patient: {
+      id: '102',
+      name: 'Jane Smith',
+      age: 32,
+      gender: 'Female',
+      condition: 'Breathing Difficulty',
+      vitals: {
+        heartRate: '110 bpm',
+        bloodPressure: '130/85',
+        oxygenSaturation: '92%',
+        temperature: '38.2°C'
+      },
+      medicalHistory: {
+        conditions: ['Asthma'],
+        allergies: ['Dust', 'Pollen'],
+        medications: ['Albuterol'],
+        previousHospitalizations: [
+          {
+            date: '2023-12-10',
+            reason: 'Severe Asthma Attack'
+          }
+        ]
+      }
+    },
+    timestamp: new Date().toISOString(),
+    status: 'pending',
+    priority: 'medium',
+    location: '456 Medical Ave'
+  }
+];
+
+export default function DashboardPage() {
+  const [requests, setRequests] = useState<EmergencyRequest[]>(mockRequests);
+  const [selectedRequest, setSelectedRequest] = useState<EmergencyRequest | null>(null);
+  const [hasNewAlert, setHasNewAlert] = useState(false);
+  const [showNotification, setShowNotification] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [notificationAudio, setNotificationAudio] = useState<HTMLAudioElement | null>(null);
+
+  // Simulate receiving new emergency requests
+  useEffect(() => {
+    const audio = new Audio();
+    audio.preload = 'auto';
+    const wavSource = document.createElement('source');
+    wavSource.src = '/notification.wav';
+    wavSource.type = 'audio/wav';
+    audio.appendChild(wavSource);
+    setNotificationAudio(audio);
+  }, []);
+
+
+  // Simulate new requests
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (Math.random() > 0.7) {
+        const newRequest: EmergencyRequest = {
+          id: Date.now().toString(),
+          patient: {
+            id: Math.random().toString(),
+            name: 'New Emergency',
+            age: Math.floor(Math.random() * 50) + 20,
+            gender: Math.random() > 0.5 ? 'Male' : 'Female',
+            condition: 'Urgent Care Required',
+            vitals: {
+              heartRate: '100 bpm',
+              bloodPressure: '145/95',
+              oxygenSaturation: '94%',
+              temperature: '38.0°C'
+            }
+          },
+          timestamp: new Date().toISOString(),
+          status: 'pending',
+          priority: 'high',
+          location: 'Emergency Location'
+        };
+
+        setRequests(prev => [newRequest, ...prev]);
+        setHasNewAlert(true);
+
+        if (notificationAudio) {
+          try {
+            notificationAudio.currentTime = 0;
+            notificationAudio.play().catch(console.error);
+          } catch (error) {
+            console.error('Error playing notification:', error);
+          }
+        }
+      }
+    }, 15000);
+
+    return () => clearInterval(interval);
+  }, [notificationAudio]);
+
+
+  const sendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newMessage.trim() || isProcessing || !selectedRequest) return;
+
+    setIsProcessing(true);
+    try {
+      // Add doctor's message
+      const doctorMessage: Message = {
+        id: `doc-${Date.now()}`,
+        content: newMessage,
+        sender: 'doctor',
+        timestamp: new Date(),
+        requestId: selectedRequest.id
+      };
+      setMessages(prev => [...prev, doctorMessage]);
+      setNewMessage('');
+
+      // Get AI response
+      const aiResponse = await getAIDiagnosis(selectedRequest.patient, newMessage);
+
+      const responseMessage: Message = {
+        id: `ai-${Date.now()}`,
+        content: aiResponse,
+        sender: 'ambulance',
+        timestamp: new Date(),
+        requestId: selectedRequest.id
+      };
+      setMessages(prev => [...prev, responseMessage]);
+    } catch (error) {
+      console.error('Chat error:', error);
+      // Add error message
+      const errorMessage: Message = {
+        id: `error-${Date.now()}`,
+        content: "Communication error. Using standard protocols.",
+        sender: 'ambulance',
+        timestamp: new Date(),
+        requestId: selectedRequest.id
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const toggleNotification = () => {
+    setShowNotification(prev => !prev);
+  };
+
+  return (
+    <main className={`min-h-screen ${hasNewAlert ? 'bg-red-50' : 'bg-gray-50'} transition-colors duration-500`}>
+      {/* Header */}
+      <nav className="bg-white shadow-sm">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex h-16 justify-between items-center">
+            <h1 className="text-2xl font-bold">Emergency Dashboard</h1>
+            <button
+              className="relative p-2 rounded-full hover:bg-gray-100"
+              onClick={toggleNotification}
+            >
+              <Bell className="h-6 w-6" />
+              {hasNewAlert && (
+                <span className="absolute top-0 right-0 block h-3 w-3 rounded-full bg-red-400" />
+              )}
+            </button>
+            {showNotification && (
+              <div className="absolute top-16 right-4 bg-white rounded-lg shadow-lg p-4 w-64">
+                <h3 className="text-lg font-semibold mb-2">Notifications</h3>
+                <ul className="space-y-2">
+                  <li>New emergency request received</li>
+                  <li>Patient vitals updated</li>
+                  <li>Doctor message sent</li>
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
+      </nav>
+
+      {/* Main Content */}
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex gap-8">
+          {/* Left Panel - Emergency Requests */}
+          <div className="w-1/2">
+            <h2 className="text-xl font-semibold mb-4">Emergency Requests</h2>
+            <div className="space-y-4">
+              {requests.map((request) => (
+                <div
+                  key={request.id}
+                  onClick={() => setSelectedRequest(request)}
+                  className={`bg-white p-4 rounded-lg border shadow-sm hover:shadow-md transition-all cursor-pointer ${
+                    selectedRequest?.id === request.id ? 'border-blue-500' : ''
+                  }`}
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="font-medium">{request.patient.name}</h3>
+                      <p className="text-sm text-gray-500">
+                        {request.patient.age} years • {request.patient.gender}
+                      </p>
+                    </div>
+                    <span className={`px-2 py-1 rounded-full text-xs ${
+                      request.priority === 'high' 
+                        ? 'bg-red-100 text-red-800' 
+                        : 'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {request.priority.toUpperCase()}
+                    </span>
+                  </div>
+                  <p className={`mt-2 font-medium ${
+                    request.priority === 'high' ? 'text-red-600' : 'text-orange-600'
+                  }`}>
+                    {request.patient.condition}
+                  </p>
+                  <div className="flex justify-between items-center mt-2">
+                    <p className="text-sm text-gray-600">
+                      {request.location}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {new Date(request.timestamp).toLocaleTimeString()}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Right Panel - Patient Details and Communication */}
+          <div className="w-1/2">
+            {selectedRequest ? (
+              <div className="space-y-6">
+                {/* Patient Information */}
+                <div className="bg-white p-6 rounded-lg border shadow-sm">
+                  <h3 className="text-lg font-semibold mb-4">Patient Information</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-500">Name</p>
+                      <p className="font-medium">{selectedRequest.patient.name}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Age</p>
+                      <p className="font-medium">{selectedRequest.patient.age} years</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Gender</p>
+                      <p className="font-medium">{selectedRequest.patient.gender}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Condition</p>
+                      <p className="font-medium text-red-600">
+                        {selectedRequest.patient.condition}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Vital Signs */}
+                  <div className="mt-6">
+                    <h4 className="font-semibold mb-3">Vital Signs</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-gray-50 p-3 rounded-lg">
+                        <p className="text-sm text-gray-500">Heart Rate</p>
+                        <p className="font-medium">{selectedRequest.patient.vitals.heartRate}</p>
+                      </div>
+                      <div className="bg-gray-50 p-3 rounded-lg">
+                        <p className="text-sm text-gray-500">Blood Pressure</p>
+                        <p className="font-medium">{selectedRequest.patient.vitals.bloodPressure}</p>
+                      </div>
+                      <div className="bg-gray-50 p-3 rounded-lg">
+                        <p className="text-sm text-gray-500">Oxygen Saturation</p>
+                        <p className="font-medium">{selectedRequest.patient.vitals.oxygenSaturation}</p>
+                      </div>
+                      <div className="bg-gray-50 p-3 rounded-lg">
+                        <p className="text-sm text-gray-500">Temperature</p>
+                        <p className="font-medium">{selectedRequest.patient.vitals.temperature}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* AI Analysis */}
+                <div className="bg-white p-6 rounded-lg border shadow-sm">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Brain className="h-6 w-6 text-blue-500" />
+                    <h3 className="text-lg font-semibold">AI Analysis</h3>
+                  </div>
+                  <div className="space-y-4">
+                    <div className="bg-orange-50 rounded-lg p-4">
+                      <div className="flex items-start gap-2">
+                        <AlertCircle className="h-5 w-5 text-orange-500 mt-0.5" />
+                        <div>
+                          <h4 className="font-medium text-orange-800">Risk Assessment</h4>
+                          <p className="text-orange-700 mt-1">
+                            Based on vital signs, immediate medical attention recommended.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Communication */}
+                <div className="bg-white rounded-lg border shadow-sm">
+    <div className="p-4 border-b">
+      <h3 className="font-semibold">Emergency Communication</h3>
+    </div>
+    <div className="h-64 overflow-y-auto p-4 space-y-4">
+      {messages.map((message) => (
+        <div
+          key={message.id}
+          className={`flex ${
+            message.sender === 'doctor' ? 'justify-end' : 'justify-start'
+          }`}
+        >
+          <div
+            className={`max-w-[80%] rounded-lg px-4 py-2 ${
+              message.sender === 'doctor'
+                ? 'bg-blue-500 text-white'
+                : 'bg-gray-100'
+            }`}
+          >
+            <p>{message.content}</p>
+            <p className={`text-xs mt-1 ${
+              message.sender === 'doctor' ? 'text-blue-100' : 'text-gray-500'
+            }`}>
+              {message.timestamp.toLocaleTimeString()}
+            </p>
+          </div>
+        </div>
+      ))}
+    </div>
+    <form onSubmit={sendMessage} className="p-4 border-t">
+      <div className="flex gap-2">
+        <input
+          type="text"
+          value={newMessage}
+          onChange={(e) => setNewMessage(e.target.value)}
+          placeholder="Type your message..."
+          className="flex-1 border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          disabled={isProcessing}
+        />
+        <button
+          type="submit"
+          disabled={isProcessing}
+          className="bg-blue-500 text-white rounded-lg px-4 py-2 hover:bg-blue-600 
+                   transition-colors disabled:opacity-50"
+        >
+          {isProcessing ? (
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+          ) : (
+            <ArrowRight className="h-5 w-5" />
+          )}
+        </button>
+      </div>
+    </form>
+  </div>
+              </div>
+            ) : (
+              <div className="h-full flex items-center justify-center text-gray-500">
+                <p>Select an emergency request to view details</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+}
