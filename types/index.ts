@@ -1,3 +1,13 @@
+export interface SocketMessage {
+  type: string;
+  data: any;
+  timestamp: number;
+}
+
+export interface SocketAuth {
+  doctorId: string;
+}
+
 export interface Patient {
     id: string;
     name: string;
@@ -14,11 +24,38 @@ export interface Patient {
   
   export interface EmergencyRequest {
     id: string;
-    patient: Patient;
-    timestamp: string;
-    status: 'pending' | 'active' | 'resolved';
+    patient: {
+      id: string;
+      name: string;
+      condition: string;
+      symptoms: string;
+      paramedics_tips: string;
+      medications: {
+        injections?: string;
+        medicines?: string;
+        painkillers?: string;
+      };
+      conversation?: string[];
+    };
+    diagnosis: {
+      patient: {
+        medical_diagnosis: string;
+        symptoms: string;
+      };
+      paramedics_tips: string;
+      medications: {
+        injections?: string;
+        medicines?: string;
+        painkillers?: string;
+      };
+      conversation_status: string;
+      diagnosed_by: string;
+      timestamp: string;
+      status: string;
+    };
     priority: 'high' | 'medium' | 'low';
-    location: string;
+    timestamp: string;
+    status: string;
   }
   
   export interface Message {

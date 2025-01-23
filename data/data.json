@@ -1,0 +1,146 @@
+{
+    role: 'system',
+    content: '{\n' +
+      '    "question": "Does the patient have a history of head injuries or brain disorders?",\n' +
+      '    "answers": {\n' +
+      '        "A": "Yes, the patient has a history of head injuries or brain disorders.",\n' +
+      '        "B": "No, the patient does not have a history of head injuries or brain disorders.",\n' +
+      '        "C": "Unknown",\n' +
+      '        "D": "Not sure."\n' +
+      '    },\n' +
+      '    "conversation_status": "DIAGNOSING"\n' +
+      '}'
+  },
+  { role: 'user', content: 'A' },
+  {
+    role: 'assistant',
+    content: '{\n' +
+      '    "question": "Is the patient experiencing any nausea or vomiting?",\n' +
+      '    "answers": {\n' +
+      '        "A": "Yes, the patient is experiencing nausea or vomiting.",\n' +
+      '        "B": "No, the patient is not experiencing nausea or vomiting.",\n' +
+      '        "C": "Mild nausea, but no vomiting.",\n' +
+      '        "D": "Not sure."\n' +
+      '    },\n' +
+      '    "conversation_status": "DIAGNOSING"\n' +
+      '}'
+  },
+  { role: 'user', content: 'A' },
+  {
+    role: 'assistant',
+    content: '{\n' +
+      '    "question": "Does the patient have any visible signs of trauma, such as lacerations or swelling, on the head or face?",\n' +
+      '    "answers": {\n' +
+      '        "A": "Yes, the patient has visible signs of trauma on the head or face.",\n' +
+      '        "B": "No, the patient does not have visible signs of trauma on the head or face.",\n' +
+      '        "C": "Some minor scratches, but no significant trauma.",\n' +
+      '        "D": "Not sure."\n' +
+      '    },\n' +
+      '    "conversation_status": "DIAGNOSING"\n' +
+      '}'
+  },
+  { role: 'user', content: 'A' },
+  {
+    role: 'assistant',
+    content: '{\n' +
+      '    "question": "Is the patient experiencing any confusion, disorientation, or difficulty speaking?",\n' +
+      '    "answers": {\n' +
+      '        "A": "Yes, the patient is experiencing confusion, disorientation, or difficulty speaking.",\n' +
+      '        "B": "No, the patient is not experiencing confusion, disorientation, or difficulty speaking.",\n' +
+      '        "C": "Mild confusion, but able to speak coherently.",\n' +
+      '        "D": "Not sure."\n' +
+      '    },\n' +
+      '    "conversation_status": "DIAGNOSING"\n' +
+      '}'
+  },
+  { role: 'user', content: 'A' },
+  {
+    role: 'assistant',
+    content: '{\n' +
+      '    "question": "Does the patient have a history of bleeding disorders or taking anticoagulant medications?",\n' +
+      '    "answers": {\n' +
+      '        "A": "Yes, the patient has a history of bleeding disorders or taking anticoagulant medications.",\n' +
+      '        "B": "No, the patient does not have a history of bleeding disorders or taking anticoagulant medications.",\n' +
+      '        "C": "Unknown",\n' +
+      '        "D": "Not sure."\n' +
+      '    },\n' +
+      '    "conversation_status": "DIAGNOSING"\n' +
+      '}'
+  },
+  { role: 'user', content: 'A' },
+  {
+    role: 'assistant',
+    content: '{\n' +
+      '    "question": "Is the patient experiencing any numbness, tingling, or weakness in the arms or legs?",\n' +
+      '    "answers": {\n' +
+      '        "A": "Yes, the patient is experiencing numbness, tingling, or weakness in the arms or legs.",\n' +
+      '        "B": "No, the patient is not experiencing numbness, tingling, or weakness in the arms or legs.",\n' +
+      '        "C": "Mild numbness, but no significant weakness.",\n' +
+      '        "D": "Not sure."\n' +
+      '    },\n' +
+      '    "conversation_status": "DIAGNOSING"\n' +
+      '}'
+  },
+  { role: 'user', content: 'A' },
+  {
+    role: 'assistant',
+    content: '{\n' +
+      '    "question": "Has the patient experienced any seizures or convulsions since the injury?",\n' +
+      '    "answers": {\n' +
+      '        "A": "Yes, the patient has experienced seizures or convulsions since the injury.",\n' +
+      '        "B": "No, the patient has not experienced seizures or convulsions since the injury.",\n' +
+      '        "C": "Unknown",\n' +
+      '        "D": "Not sure."\n' +
+      '    },\n' +
+      '    "conversation_status": "DIAGNOSING"\n' +
+      '}'
+  },
+  { role: 'user', content: 'A' },
+  {
+    role: 'assistant',
+    content: '{\n' +
+      `    "question": "Is the patient's pupils equal and reactive to light?",\n` +
+      '    "answers": {\n' +
+      `        "A": "Yes, the patient's pupils are equal and reactive to light.",\n` +
+      `        "B": "No, the patient's pupils are not equal and reactive to light.",\n` +
+      '        "C": "One pupil is dilated, but reactive to light.",\n' +
+      '        "D": "Not sure."\n' +
+      '    },\n' +
+      '    "conversation_status": "DIAGNOSING"\n' +
+      '}'
+  },
+  { role: 'user', content: 'A' },
+  {
+    role: 'assistant',
+    content: '{\n' +
+      '    "question": "Has the patient experienced any loss of bladder or bowel control since the injury?",\n' +
+      '    "answers": {\n' +
+      '        "A": "Yes, the patient has experienced loss of bladder or bowel control since the injury.",\n' +
+      '        "B": "No, the patient has not experienced loss of bladder or bowel control since the injury.",\n' +
+      '        "C": "Unknown",\n' +
+      '        "D": "Not sure."\n' +
+      '    },\n' +
+      '    "conversation_status": "DIAGNOSING"\n' +
+      '}'
+  },
+  { role: 'user', content: 'A' },
+  {
+    role: 'assistant',
+    content: '{\n' +
+      '    "patient": {\n' +
+      '        "medical_diagnosis": "Traumatic Brain Injury (TBI) with possible Subdural Hematoma",\n' +
+      '        "symptoms": "Nausea, vomiting, confusion, disorientation, difficulty speaking, numbness, tingling, weakness, seizures, loss of bladder or bowel control"\n' +
+      '    },\n' +
+      `    "paramedics_tips": "Immobilize the patient's head and neck, administer oxygen, and transport to a trauma center immediately",\n` +
+      '    "medications": {\n' +
+      '        "injections": "Mannitol, Fentanyl",\n' +
+      '        "medicines": "Phenytoin, Dexamethasone",\n' +
+      '        "painkillers": "Morphine, Acetaminophen"\n' +
+      '    },\n' +
+      '    "conversation_status": "DIAGNOSED"\n' +
+      '}'
+  }
+],
+diagnosed_by: 'Mohamed Al Mehairbi',
+timestamp: '2025-01-23 15:39:02'
+}
