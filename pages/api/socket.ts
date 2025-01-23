@@ -1,6 +1,28 @@
 // socket.ts
 import { Server } from 'socket.io';
+import fs from 'fs';
+import path from 'path';
 
+const saveEmergencyData = (emergencyData: any) => {
+  // Ensure data directory exists
+  const dataDir = path.join(process.cwd(), 'data');
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+  }
+
+  // Generate filename with timestamp
+  const timestamp = new Date().toISOString().replace(/:/g, '-');
+  const filename = `emergency_${emergencyData.id}_${timestamp}.json`;
+  const filePath = path.join(dataDir, filename);
+
+  // Write JSON file
+  try {
+    fs.writeFileSync(filePath, JSON.stringify(emergencyData, null, 2));
+    console.log(`Emergency data saved: ${filePath}`);
+  } catch (error) {
+    console.error('Error saving emergency data:', error);
+  }
+};
 const SocketHandler = (req, res) => {
  if (!res.socket.server.io) {
    const io = new Server(res.socket.server, {
@@ -35,6 +57,7 @@ const SocketHandler = (req, res) => {
          timestamp: data.timestamp,
          status: data.diagnosis.conversation_status.toLowerCase()
        };
+     saveEmergencyData(emergencyData);
        io.emit('emergency', emergencyData);
      });
    });

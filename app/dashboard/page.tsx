@@ -1,10 +1,20 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+'use client';
+
+import React, { useState, useEffect } from 'react'; // Import hooks here
 import { Bell, Brain, ArrowRight, AlertCircle } from 'lucide-react';
 import { getAIDiagnosis } from '@/services/aiService';
 import type { EmergencyRequest, Message } from '@/types';
 import io from 'socket.io-client';
+import Header from '@/components/ui/Header';
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import PatientInfo from '@/components/PatientInfo';
+import { Chat } from '@/components/chat';
+
 
 // Mock data with full patient details
 
@@ -116,230 +126,128 @@ export default function DashboardPage() {
   return (
     <main className={`min-h-screen ${hasNewAlert ? 'bg-red-50' : 'bg-gray-50'} transition-colors duration-500`}>
       {/* Header */}
-      <nav className="bg-white shadow-sm">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 justify-between items-center">
-            <h1 className="text-2xl font-bold">Emergency Dashboard</h1>
-            <button
-              className="relative p-2 rounded-full hover:bg-gray-100"
-              onClick={toggleNotification}
-            >
-              <Bell className="h-6 w-6" />
-              {hasNewAlert && (
-                <span className="absolute top-0 right-0 block h-3 w-3 rounded-full bg-red-400" />
-              )}
-            </button>
-            {showNotification && (
- <div className="absolute top-16 right-4 bg-white rounded-lg shadow-lg p-4 w-96">
-   <h3 className="text-lg font-semibold mb-2">Notifications</h3>
-   <div className="max-h-96 overflow-y-auto">
-     {notifications.map(note => (
-       <div key={note.id} className="p-3 border-b hover:bg-gray-50">
-         <div className="font-medium">{note.title}</div>
-         <p className="text-sm text-gray-600">{note.message}</p>
-         <div className="flex justify-between mt-1 text-xs text-gray-500">
-           <span>Dr. {note.doctor}</span>
-           <span>{new Date(note.timestamp).toLocaleString()}</span>
-         </div>
-       </div>
-     ))}
-   </div>
- </div>
-)}
+      <Header 
+  notifications={
+    <div className="max-h-96 overflow-y-auto">
+      {notifications.map(note => (
+        <div key={note.id} className="p-3 border-b hover:bg-gray-50">
+          <div className="font-medium">{note.title}</div>
+          <p className="text-sm text-gray-600">{note.message}</p>
+          <div className="flex justify-between mt-1 text-xs text-gray-500">
+            <span>Dr. {note.doctor}</span>
+            <span>{new Date(note.timestamp).toLocaleString()}</span>
           </div>
         </div>
-      </nav>
+      ))}
+    </div>
+  }
+  hasNewAlert={hasNewAlert}
+  toggleNotification={toggleNotification}
+/>
 
       {/* Main Content */}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
   <div className="flex gap-8">
     {/* Left Panel - Emergency Requests */}
     <div className="w-1/2">
-      <h2 className="text-xl font-semibold mb-4">Emergency Requests</h2>
+  <Card className="h-[calc(100vh-2rem)] bg-white p-6">
+    <CardHeader className="pb-6">
+      <div className="flex items-center gap-3">
+        <CardTitle className="text-3xl font-bold text-red-500">
+          Emergency Requests
+        </CardTitle>
+        <div className="flex items-center gap-2">
+  <Badge 
+    variant="destructive" 
+    className="px-3 py-1 text-sm font-bold tracking-wider animate-pulse"
+  >
+    LIVE
+  </Badge>
+  <span className="relative flex h-2 w-2">
+    <span className="absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75 animate-ping"></span>
+    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+  </span>
+</div>
+      </div>
+    </CardHeader>
+    <ScrollArea className="h-[calc(100vh-8rem)]">
       <div className="space-y-4">
         {requests.map((request) => (
           <div
             key={request.id}
             onClick={() => setSelectedRequest(request)}
-            className={`bg-white p-4 rounded-lg border shadow-sm hover:shadow-md transition-all cursor-pointer ${
-              selectedRequest?.id === request.id ? 'border-blue-500' : ''
-            }`}
+            className="rounded-lg border border-gray-200 p-6 
+  transition-all duration-300 
+  hover:border-red-200 hover:shadow-lg hover:bg-red-50/30 
+  cursor-pointer"
           >
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="font-medium">{request.patient.name}</h3>
-                <p className="text-sm text-gray-500">
-                  {request.patient.symptoms}
-                </p>
+            <div className="flex justify-between">
+              <div className="space-y-2">
+              <h3 className="text-xl font-bold text-gray-900">{request.patient.name}</h3>
+              <p className="text-gray-600 text-base leading-relaxed">{request.patient.symptoms}</p>
+              <p className="text-red-600 font-semibold">{request.patient.condition}</p>
               </div>
-              <span className={`px-2 py-1 rounded-full text-xs ${
-                request.priority === 'high' 
-                  ? 'bg-red-100 text-red-800' 
-                  : 'bg-yellow-100 text-yellow-800'
-              }`}>
+              <Badge variant="destructive" className="h-fit">
                 {request.priority.toUpperCase()}
-              </span>
+              </Badge>
             </div>
-            <p className={`mt-2 font-medium ${
-              request.priority === 'high' ? 'text-red-600' : 'text-orange-600'
-            }`}>
-              {request.patient.condition}
-            </p>
-            <div className="flex justify-between items-center mt-2">
-              <div className="flex items-center gap-2">
-                <span className="px-2 py-1 text-xs bg-blue-50 text-blue-700 rounded">
-                  {request.status.toUpperCase()}
-                </span>
-                {request.diagnosis && (
-                  <span className="text-xs text-gray-500">
-                    Dr. {request.diagnosis.diagnosed_by}
-                  </span>
-                )}
+            
+            <div className="mt-4 flex items-center justify-between">
+            <Badge variant="outline" className={cn(
+  "transition-colors",
+  request.status === "pending" && "bg-yellow-50 border-yellow-200 text-yellow-700",
+  request.status === "diagnosed" && "bg-green-50 border-green-200 text-green-700" 
+)}>
+  {request.status}
+</Badge>
+              <div className="flex items-center gap-4 text-gray-500">
+                <span>Dr. {request.diagnosis?.diagnosed_by}</span>
+                <time>{new Date(request.timestamp).toLocaleTimeString()}</time>
               </div>
-              <p className="text-xs text-gray-500">
-                {new Date(request.timestamp).toLocaleTimeString()}
-              </p>
             </div>
           </div>
         ))}
       </div>
-    </div>
+    </ScrollArea>
+  </Card>
+</div>
 
           {/* Right Panel - Patient Details and Communication */}
-          <div className="w-1/2">
-            {selectedRequest ? (
-              <div className="space-y-6">
-                {/* Patient Information */}
-                <div className="bg-white p-6 rounded-lg border shadow-sm">
-                  <h3 className="text-lg font-semibold mb-4">Patient Information</h3>
-                   <div className="grid grid-cols-2 gap-4">
-    <div>
-      <p className="text-sm text-gray-500">Name</p>
-      <p className="font-medium">{selectedRequest.patient.name}</p>
-    </div>
-    <div>
-      <p className="text-sm text-gray-500">Condition</p>
-      <p className="font-medium text-red-600">
-        {selectedRequest.patient.condition}
-      </p>
-    </div>
-    <div>
-      <p className="text-sm text-gray-500">Symptoms</p>
-      <p className="font-medium">{selectedRequest.patient.symptoms}</p>
-    </div>
-    <div>
-      <p className="text-sm text-gray-500">Status</p>
-      <p className="font-medium">{selectedRequest.status}</p>
-    </div>
-  </div>
+{/* Right Panel - Patient Details and Communication */}
+<div className="w-1/2">
+  {selectedRequest ? (
+    <div className="space-y-6">
+      {/* Patient Info */}
+      <PatientInfo patient={{
+        name: selectedRequest.patient.name,
+        condition: selectedRequest.patient.condition,
+        symptoms: selectedRequest.patient.symptoms,
+        status: selectedRequest.status,
+        vitals: {
+          heartRate: selectedRequest.patient.vitals?.heartRate || `${Math.floor(Math.random() * (120 - 60) + 60)} bpm`,
+          bloodPressure: selectedRequest.patient.vitals?.bloodPressure || `${Math.floor(Math.random() * (160 - 100) + 100)}/${Math.floor(Math.random() * (100 - 60) + 60)}`,
+          oxygenSaturation: selectedRequest.patient.vitals?.oxygenSaturation || `${Math.floor(Math.random() * (100 - 90) + 90)}%`,
+          temperature: selectedRequest.patient.vitals?.temperature || `${(Math.random() * (39 - 36) + 36).toFixed(1)}°C`
+        }
+      }} />
 
-                  {/* Vital Signs */}
-                  <div className="mt-6">
-  <h4 className="font-semibold mb-3">Vital Signs</h4>
-  <div className="grid grid-cols-2 gap-4">
-    <div className="bg-gray-50 p-3 rounded-lg">
-      <p className="text-sm text-gray-500">Heart Rate</p>
-      <p className="font-medium">{selectedRequest.patient.vitals?.heartRate || `${Math.floor(Math.random() * (120 - 60) + 60)} bpm`}</p>
+      {/* Chat Component */}
+      <Chat
+        messages={messages}
+        onSendMessage={(message) => {
+          setNewMessage(message);
+          sendMessage(message); // Ensure `sendMessage` handles communication logic
+        }}
+        isProcessing={isProcessing}
+      />
     </div>
-    <div className="bg-gray-50 p-3 rounded-lg">
-      <p className="text-sm text-gray-500">Blood Pressure</p>
-      <p className="font-medium">{selectedRequest.patient.vitals?.bloodPressure || `${Math.floor(Math.random() * (160 - 100) + 100)}/${Math.floor(Math.random() * (100 - 60) + 60)}`}</p>
+  ) : (
+    <div className="h-full flex items-center justify-center text-muted-foreground">
+      <p>Select an emergency request to view details</p>
     </div>
-    <div className="bg-gray-50 p-3 rounded-lg">
-      <p className="text-sm text-gray-500">Oxygen Saturation</p>
-      <p className="font-medium">{selectedRequest.patient.vitals?.oxygenSaturation || `${Math.floor(Math.random() * (100 - 90) + 90)}%`}</p>
-    </div>
-    <div className="bg-gray-50 p-3 rounded-lg">
-      <p className="text-sm text-gray-500">Temperature</p>
-      <p className="font-medium">{selectedRequest.patient.vitals?.temperature || `${(Math.random() * (39 - 36) + 36).toFixed(1)}°C`}</p>
-    </div>
-  </div>
-</div>
-                </div>
-
-                {/* AI Analysis */}
-                <div className="bg-white p-6 rounded-lg border shadow-sm">
-  <div className="flex items-center gap-2 mb-4">
-    <Brain className="h-6 w-6 text-blue-500" />
-    <h3 className="text-lg font-semibold">AI Analysis</h3>
-  </div>
-  <div className="space-y-4">
-    <div className="bg-orange-50 rounded-lg p-4">
-      <div className="flex items-start gap-2">
-        <AlertCircle className="h-5 w-5 text-orange-500 mt-0.5" />
-        <div>
-          <h4 className="font-medium text-orange-800">Risk Assessment</h4>
-          <p className="text-orange-700 mt-1">
-            Based on vital signs, immediate medical attention recommended.
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
+  )}
 </div>
 
-                {/* Communication */}
-                <div className="bg-white rounded-lg border shadow-sm">
-    <div className="p-4 border-b">
-      <h3 className="font-semibold">Emergency Communication</h3>
-    </div>
-    <div className="h-64 overflow-y-auto p-4 space-y-4">
-      {messages.map((message) => (
-        <div
-          key={message.id}
-          className={`flex ${
-            message.sender === 'doctor' ? 'justify-end' : 'justify-start'
-          }`}
-        >
-          <div
-            className={`max-w-[80%] rounded-lg px-4 py-2 ${
-              message.sender === 'doctor'
-                ? 'bg-blue-500 text-white'
-                : 'bg-gray-100'
-            }`}
-          >
-            <p>{message.content}</p>
-            <p className={`text-xs mt-1 ${
-              message.sender === 'doctor' ? 'text-blue-100' : 'text-gray-500'
-            }`}>
-              {message.timestamp.toLocaleTimeString()}
-            </p>
-          </div>
-        </div>
-      ))}
-    </div>
-    <form onSubmit={sendMessage} className="p-4 border-t">
-      <div className="flex gap-2">
-        <input
-          type="text"
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          placeholder="Type your message..."
-          className="flex-1 border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          disabled={isProcessing}
-        />
-        <button
-          type="submit"
-          disabled={isProcessing}
-          className="bg-blue-500 text-white rounded-lg px-4 py-2 hover:bg-blue-600 
-                   transition-colors disabled:opacity-50"
-        >
-          {isProcessing ? (
-            <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-          ) : (
-            <ArrowRight className="h-5 w-5" />
-          )}
-        </button>
-      </div>
-    </form>
-  </div>
-              </div>
-            ) : (
-              <div className="h-full flex items-center justify-center text-gray-500">
-                <p>Select an emergency request to view details</p>
-              </div>
-            )}
-          </div>
         </div>
       </div>
     </main>
