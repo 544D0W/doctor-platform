@@ -39,11 +39,11 @@ export async function POST(req: Request) {
  
  try {
    const response = await client.chat.completions.create({
-     model: 'Meta-Llama-3.1-405B-Instruct',
+     model: 'Meta-Llama-3.3-70B-Instruct',
      messages: [
        { 
          role: 'system', 
-         content: 'You are a medical AI assistant. Use the provided training data to format responses.'
+         content: 'You are a medical AI assistant. Use the provided training data to format responses. Do not send any jsons or any previous data.'
        },
        {
          role: 'system',
