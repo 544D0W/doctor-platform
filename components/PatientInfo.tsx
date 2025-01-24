@@ -1,107 +1,61 @@
 import { motion } from "framer-motion";
 import { Patient } from '@/types';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import VitalsCard from '@/components/VitalsCard';
+import MedicalHistoryCard from '@/components/MedicalHistoryCard';
+import { UserRound, UserCircle, Calendar, Users, Activity } from 'lucide-react';
 
 interface PatientInfoProps {
  patient: Patient;
 }
 
 export default function PatientInfo({ patient }: PatientInfoProps) {
- return (
-   <motion.div
-     initial={{ opacity: 0, y: 10 }}
-     animate={{ opacity: 1, y: 0 }}
-     exit={{ opacity: 0, y: -10 }}
-     transition={{ duration: 0.3 }}
-   >
-     <Card>
-       <CardHeader>
-         <CardTitle className="font-bold text-2xl">Patient Information</CardTitle>
-       </CardHeader>
-       <CardContent className="space-y-6">
-         <div className="grid grid-cols-2 gap-4">
-           <div className="p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
-             <p className="text-sm text-muted-foreground">Name</p>
-             <p className="font-medium">{patient.name}</p>
-           </div>
-           <div className="p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
-             <p className="text-sm text-muted-foreground">Age</p>
-             <p className="font-medium">{patient.age} years</p>
-           </div>
-           <div className="p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
-             <p className="text-sm text-muted-foreground">Gender</p>
-             <p className="font-medium">{patient.gender}</p>
-           </div>
-           <div className="p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
-             <p className="text-sm text-muted-foreground">Condition</p>
-             <p className="font-medium text-destructive">{patient.condition}</p>
-           </div>
-         </div>
-
-         <Card>
-           <CardHeader>
-             <CardTitle className="text-xl">Vital Signs</CardTitle>
-           </CardHeader>
-           <CardContent>
-             <div className="grid grid-cols-2 gap-4">
-               <motion.div 
-                 className="bg-accent/50 p-4 rounded-lg"
-                 whileHover={{ scale: 1.02 }}
-                 transition={{ type: "spring", stiffness: 300 }}
-               >
-                 <p className="text-sm text-muted-foreground">Heart Rate</p>
-                 <p className="font-medium text-lg">{patient.vitals.heartRate}</p>
-               </motion.div>
-               <motion.div 
-                 className="bg-accent/50 p-4 rounded-lg"
-                 whileHover={{ scale: 1.02 }}
-                 transition={{ type: "spring", stiffness: 300 }}
-               >
-                 <p className="text-sm text-muted-foreground">Blood Pressure</p>
-                 <p className="font-medium text-lg">{patient.vitals.bloodPressure}</p>
-               </motion.div>
-               <motion.div 
-                 className="bg-accent/50 p-4 rounded-lg"
-                 whileHover={{ scale: 1.02 }}
-                 transition={{ type: "spring", stiffness: 300 }}
-               >
-                 <p className="text-sm text-muted-foreground">Oxygen Saturation</p>
-                 <p className="font-medium text-lg">{patient.vitals.oxygenSaturation}</p>
-               </motion.div>
-               <motion.div 
-                 className="bg-accent/50 p-4 rounded-lg"
-                 whileHover={{ scale: 1.02 }}
-                 transition={{ type: "spring", stiffness: 300 }}
-               >
-                 <p className="text-sm text-muted-foreground">Temperature</p>
-                 <p className="font-medium text-lg">{patient.vitals.temperature}</p>
-               </motion.div>
-             </div>
-           </CardContent>
-         </Card>
-
-         <Card>
-           <CardHeader>
-             <CardTitle className="text-xl">Medical History</CardTitle>
-           </CardHeader>
-           <CardContent>
-             <motion.div 
-               className="space-y-2"
-               initial={{ opacity: 0 }}
-               animate={{ opacity: 1 }}
-               transition={{ delay: 0.2 }}
-             >
-               <p className="text-sm text-muted-foreground">Allergies</p>
-               <p className="font-medium">{patient.allergies || 'None reported'}</p>
-               <p className="text-sm text-muted-foreground mt-4">Previous Conditions</p>
-               <p className="font-medium">{patient.previousConditions || 'None reported'}</p>
-               <p className="text-sm text-muted-foreground mt-4">Current Medications</p>
-               <p className="font-medium">{patient.medications || 'None reported'}</p>
-             </motion.div>
-           </CardContent>
-         </Card>
-       </CardContent>
-     </Card>
-   </motion.div>
- );
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.5 }}
+    >
+      <Card className="bg-gradient-to-br from-white to-gray-50">
+        <CardHeader className="border-b bg-white/50 backdrop-blur-sm">
+          <div className="flex items-center gap-3">
+            <UserRound className="w-8 h-8 text-primary" />
+            <CardTitle className="font-bold text-2xl">Patient Information</CardTitle>
+          </div>
+        </CardHeader>
+  
+        <CardContent className="space-y-6 p-6">
+          <motion.div 
+            className="grid grid-cols-2 gap-4"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            {[
+              { label: "Name", value: patient.name, icon: <UserCircle className="w-5 h-5" /> },
+              { label: "Age", value: `${patient.age} years`, icon: <Calendar className="w-5 h-5" /> },
+              { label: "Gender", value: patient.gender, icon: <Users className="w-5 h-5" /> },
+              { label: "Condition", value: patient.condition, icon: <Activity className="w-5 h-5" />, alert: true }
+            ].map((item) => (
+              <motion.div
+                key={item.label}
+                whileHover={{ scale: 1.02 }}
+                className="p-4 rounded-xl border bg-white shadow-sm hover:shadow-md transition-all"
+              >
+                <div className="flex items-center gap-2 mb-1 text-gray-500">
+                  {item.icon}
+                  <p className="text-sm">{item.label}</p>
+                </div>
+                <p className={`font-medium text-lg ${item.alert ? 'text-red-500' : ''}`}>
+                  {item.value}
+                </p>
+              </motion.div>
+            ))}
+          </motion.div>
+  
+          <VitalsCard vitals={patient.vitals} />
+          <MedicalHistoryCard patient={patient} />
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
 }

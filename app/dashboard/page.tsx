@@ -13,7 +13,8 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import PatientInfo from '@/components/PatientInfo';
-import { Chat } from '@/components/chat';
+import  Chat  from '@/components/chat';
+import EmergencyRequestPanel from '@/components/EmergencyRequestPanel';
 
 
 // Mock data with full patient details
@@ -148,68 +149,12 @@ export default function DashboardPage() {
       {/* Main Content */}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
   <div className="flex gap-8">
-    {/* Left Panel - Emergency Requests */}
-    <div className="w-1/2">
-  <Card className="h-[calc(100vh-2rem)] bg-white p-6">
-    <CardHeader className="pb-6">
-      <div className="flex items-center gap-3">
-        <CardTitle className="text-3xl font-bold text-red-500">
-          Emergency Requests
-        </CardTitle>
-        <div className="flex items-center gap-2">
-  <Badge 
-    variant="destructive" 
-    className="px-3 py-1 text-sm font-bold tracking-wider animate-pulse"
-  >
-    LIVE
-  </Badge>
-  <span className="relative flex h-2 w-2">
-    <span className="absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75 animate-ping"></span>
-    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-  </span>
-</div>
-      </div>
-    </CardHeader>
-    <ScrollArea className="h-[calc(100vh-8rem)]">
-      <div className="space-y-4">
-        {requests.map((request) => (
-          <div
-            key={request.id}
-            onClick={() => setSelectedRequest(request)}
-            className="rounded-lg border border-gray-200 p-6 
-  transition-all duration-300 
-  hover:border-red-200 hover:shadow-lg hover:bg-red-50/30 
-  cursor-pointer"
-          >
-            <div className="flex justify-between">
-              <div className="space-y-2">
-              <h3 className="text-xl font-bold text-gray-900">{request.patient.name}</h3>
-              <p className="text-gray-600 text-base leading-relaxed">{request.patient.symptoms}</p>
-              <p className="text-red-600 font-semibold">{request.patient.condition}</p>
-              </div>
-              <Badge variant="destructive" className="h-fit">
-                {request.priority.toUpperCase()}
-              </Badge>
-            </div>
-            
-            <div className="mt-4 flex items-center justify-between">
-            <Badge variant="outline" className={cn(
-  "transition-colors",
-  request.status === "pending" && "bg-yellow-50 border-yellow-200 text-yellow-700",
-  request.status === "diagnosed" && "bg-green-50 border-green-200 text-green-700" 
-)}>
-  {request.status}
-</Badge>
-              <div className="flex items-center gap-4 text-gray-500">
-                <span>Dr. {request.diagnosis?.diagnosed_by}</span>
-                <time>{new Date(request.timestamp).toLocaleTimeString()}</time>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </ScrollArea>
-  </Card>
+  {/* Left Panel - Emergency Requests */}
+<div className="w-1/2">
+  <EmergencyRequestPanel 
+    requests={requests} 
+    onSelect={setSelectedRequest}
+  />
 </div>
 
           {/* Right Panel - Patient Details and Communication */}
@@ -233,12 +178,10 @@ export default function DashboardPage() {
 
       {/* Chat Component */}
       <Chat
-        messages={messages}
-        onSendMessage={(message) => {
-          setNewMessage(message);
-          sendMessage(message); // Ensure `sendMessage` handles communication logic
-        }}
-        isProcessing={isProcessing}
+       messages={messages}
+       onSendMessage={sendMessage}
+       isProcessing={isProcessing}
+       patientCondition={selectedRequest?.patient.condition}
       />
     </div>
   ) : (

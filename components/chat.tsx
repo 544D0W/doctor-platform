@@ -1,178 +1,165 @@
-import { motion } from "framer-motion";
+import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import React, { useState, useRef, useEffect } from 'react';
-import { Send, Paperclip, Users, AlertCircle } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import MessageBubble from '@/components/MessageBubble';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Brain, Send, AlertCircle, Clock, Loader2 } from "lucide-react";
+
 
 interface Message {
   id: string;
   content: string;
-  sender: 'doctor' | 'ambulance' | 'system';
+  sender: 'doctor' | 'ai' | 'system';
   timestamp: Date;
-  attachments?: string[];
-  status?: 'sent' | 'delivered' | 'error';
+  status?: 'sending' | 'sent' | 'error';
 }
 
-interface ChatProps {
+interface EmergencyChatProps {
   messages: Message[];
-  onSendMessage: (message: string, attachments?: string[]) => void;
+  onSendMessage: (message: string) => void;
   isProcessing: boolean;
+  patientCondition?: string;
 }
 
-export function Chat({ messages, onSendMessage, isProcessing }: ChatProps) {
+export default function EmergencyChat({ 
+  messages, 
+  onSendMessage, 
+  isProcessing,
+  patientCondition 
+}: EmergencyChatProps) {
   const [newMessage, setNewMessage] = useState('');
-  const [attachments, setAttachments] = useState<string[]>([]);
-  const messagesEndRef = useRef<null | HTMLDivElement>(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    scrollToBottom();
+    scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if ((newMessage.trim() || attachments.length > 0) && !isProcessing) {
-      onSendMessage(newMessage, attachments);
+    if (newMessage.trim() && !isProcessing) {
+      onSendMessage(newMessage.trim());
       setNewMessage('');
-      setAttachments([]);
+      inputRef.current?.focus();
     }
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files) {
-      const fileUrls = Array.from(files).map(file => URL.createObjectURL(file));
-      setAttachments(prev => [...prev, ...fileUrls]);
-    }
-  };
+  const renderMessage = (message: Message) => {
+    const isAI = message.sender === 'ai';
+    const isSystem = message.sender === 'system';
 
-  const getMessageStyle = (message: Message) => {
-    switch (message.sender) {
-      case 'doctor':
-        return {
-          container: 'justify-end',
-          background: 'bg-primary text-primary-foreground',
-          status: 'text-primary-foreground/70'
-        };
-      case 'system':
-        return {
-          container: 'justify-center',
-          background: 'bg-accent border border-border',
-          status: 'text-muted-foreground'
-        };
-      default:
-        return {
-          container: 'justify-start',
-          background: 'bg-muted text-foreground',
-          status: 'text-muted-foreground'
-        };
-    }
+    return (
+      <div
+        key={message.id}
+        className={`flex ${isAI ? 'justify-start' : isSystem ? 'justify-center' : 'justify-end'} mb-4`}
+      >
+        <div
+          className={`
+            max-w-[80%] rounded-lg p-3 shadow-sm
+            ${isAI ? 'bg-blue-50 border border-blue-100' : 
+              isSystem ? 'bg-gray-50 border border-gray-200' : 
+              'bg-primary text-primary-foreground'}
+            ${message.status === 'error' ? 'border-red-300 bg-red-50' : ''}
+          `}
+        >
+          {message.sender === 'ai' && (
+            <div className="flex items-center gap-2 mb-1">
+              <Brain className="h-4 w-4 text-blue-500" />
+              <span className="text-xs font-medium text-blue-500">AI Assistant</span>
+            </div>
+          )}
+          
+          <p className={`text-sm ${isAI ? 'text-gray-800' : isSystem ? 'text-gray-600' : 'text-primary-foreground'}`}>
+            {message.content}
+          </p>
+          
+          <div className="flex items-center justify-between mt-1 text-xs">
+            <span className={`
+              ${isAI ? 'text-blue-400' : isSystem ? 'text-gray-400' : 'text-primary-foreground/70'}
+            `}>
+              {message.timestamp.toLocaleTimeString()}
+            </span>
+            
+            {message.status && (
+              <span className="flex items-center gap-1">
+                {message.status === 'sending' && (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                )}
+                {message.status === 'error' && (
+                  <AlertCircle className="h-3 w-3 text-red-500" />
+                )}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="h-[500px] flex flex-col"
-    >
-      <Card className="flex-1 flex flex-col">
-        <CardHeader className="flex flex-row items-center justify-between border-b">
-          <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5 text-primary" />
-            Emergency Communication
-          </CardTitle>
-          <div className="text-sm text-muted-foreground">
-            Total Messages: {messages.length}
+    <Card className="h-[600px] flex flex-col bg-gradient-to-br from-white to-blue-50">
+      <CardHeader className="border-b backdrop-blur-sm bg-white/50">
+        <motion.div 
+          className="flex items-center justify-between"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <div className="flex items-center gap-3">
+            <Brain className="h-6 w-6 text-blue-500" />
+            <CardTitle className="text-xl font-bold">AI Medical Assistant</CardTitle>
           </div>
-        </CardHeader>
-        <CardContent className="flex-1 flex flex-col overflow-hidden">
-          <div className="flex-1 overflow-y-auto space-y-4 mb-4 pr-2 py-4">
-            {messages.map((message) => {
-              const style = getMessageStyle(message);
-              return (
-                <div
-                  key={message.id}
-                  className={`flex ${style.container}`}
-                >
-                  <div
-                    className={`max-w-[80%] rounded-lg px-4 py-2 relative 
-                      ${style.background} ${
-                      message.status === 'error' 
-                        ? 'border-2 border-destructive' 
-                        : ''
-                    }`}
-                  >
-                    {message.status === 'error' && (
-                      <AlertCircle className="absolute -top-2 -right-2 text-destructive bg-background rounded-full" />
-                    )}
-                    <p>{message.content}</p>
-                    {message.attachments && (
-                      <div className="mt-2 flex gap-2">
-                        {message.attachments.map((attachment, index) => (
-                          <img 
-                            key={index} 
-                            src={attachment} 
-                            alt={`Attachment ${index + 1}`} 
-                            className="h-16 w-16 object-cover rounded-md"
-                          />
-                        ))}
-                      </div>
-                    )}
-                    <p className={`text-xs mt-1 ${style.status}`}>
-                      {message.timestamp.toLocaleTimeString()}
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
-            <div ref={messagesEndRef} />
-          </div>
-
-          {attachments.length > 0 && (
-            <div className="flex gap-2 mb-2">
-              {attachments.map((attachment, index) => (
-                <img 
-                  key={index} 
-                  src={attachment} 
-                  alt={`Preview ${index + 1}`} 
-                  className="h-12 w-12 object-cover rounded-md"
-                />
-              ))}
-            </div>
+          {patientCondition && (
+            <motion.div whileHover={{ scale: 1.05 }}>
+              <Badge variant="destructive" className="px-3 py-1 uppercase">
+                {patientCondition}
+              </Badge>
+            </motion.div>
           )}
-
-          <form onSubmit={handleSubmit} className="flex gap-2 items-center">
-            <label htmlFor="file-upload" className="cursor-pointer">
-              <Paperclip className="text-muted-foreground hover:text-primary" />
-              <input 
-                id="file-upload"
-                type="file" 
-                multiple 
-                className="hidden"
-                onChange={handleFileUpload}
-              />
-            </label>
-            <Input
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              placeholder="Type your message..."
-              disabled={isProcessing}
-              className="flex-1"
-            />
-            <Button type="submit" disabled={isProcessing}>
+        </motion.div>
+      </CardHeader>
+  
+      <CardContent className="flex-1 flex flex-col p-4">
+        <ScrollArea className="flex-1 pr-4">
+          <AnimatePresence>
+            {messages.map((message) => (
+              <MessageBubble key={message.id} message={message} />
+            ))}
+            <div ref={scrollRef} />
+          </AnimatePresence>
+        </ScrollArea>
+  
+        <motion.form 
+          onSubmit={handleSubmit}
+          className="mt-4 flex gap-2"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          <Input
+            ref={inputRef}
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            placeholder="Ask about patient condition, symptoms, or treatment..."
+            disabled={isProcessing}
+            className="flex-1 bg-white/70 backdrop-blur-sm"
+          />
+          <motion.div whileHover={{ scale: 1.05 }}>
+            <Button 
+              type="submit" 
+              disabled={isProcessing || !newMessage.trim()}
+              className="bg-blue-500 hover:bg-blue-600 text-white"
+            >
               {isProcessing ? (
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <Send className="h-4 w-4" />
               )}
             </Button>
-          </form>
-        </CardContent>
-      </Card>
-    </motion.div>
+          </motion.div>
+        </motion.form>
+      </CardContent>
+    </Card>
   );
 }
