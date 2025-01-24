@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import React, { useState, useEffect } from 'react'; // Import hooks here
@@ -117,72 +115,80 @@ export default function DashboardPage() {
   };
 
   return (
-    <main className={`min-h-screen ${hasNewAlert ? 'bg-red-50' : 'bg-gray-50'} transition-colors duration-500`}>
-      {/* Header */}
+    <main className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <Header 
-  notifications={
-    <div className="max-h-96 overflow-y-auto">
-      {notifications.map(note => (
-        <div key={note.id} className="p-3 border-b hover:bg-gray-50">
-          <div className="font-medium">{note.title}</div>
-          <p className="text-sm text-gray-600">{note.message}</p>
-          <div className="flex justify-between mt-1 text-xs text-gray-500">
-            <span>Dr. {note.doctor}</span>
-            <span>{new Date(note.timestamp).toLocaleString()}</span>
+        notifications={
+          <div className="max-h-96 overflow-y-auto rounded-lg shadow-lg divide-y divide-gray-100">
+            {notifications.map(note => (
+              <div key={note.id} className="p-4 hover:bg-gray-50 transition-colors duration-200">
+                <div className="font-medium text-gray-900">{note.title}</div>
+                <p className="text-sm text-gray-600 mt-1">{note.message}</p>
+                <div className="flex justify-between mt-2 text-xs text-gray-500">
+                  <span className="flex items-center">
+                    <span className="w-2 h-2 rounded-full bg-green-400 mr-2"></span>
+                    Dr. {note.doctor}
+                  </span>
+                  <span>{new Date(note.timestamp).toLocaleString()}</span>
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
-      ))}
-    </div>
-  }
-  hasNewAlert={hasNewAlert}
-  toggleNotification={toggleNotification}
-/>
+        }
+        hasNewAlert={hasNewAlert}
+        toggleNotification={toggleNotification}
+      />
 
       {/* Main Content */}
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-  <div className="flex gap-8">
-  {/* Left Panel - Emergency Requests */}
-<div className="w-1/2">
-  <EmergencyRequestPanel 
-    requests={requests} 
-    onSelect={setSelectedRequest}
-  />
-</div>
+      <div className="mx-auto max-w-8xl px-4 sm:px-6 lg:px-8 py-6">
+        <div className="flex gap-6">
+          {/* Left Panel - Emergency Requests */}
+          <div className="w-1/2 transition-all duration-200 hover:shadow-lg">
+            <EmergencyRequestPanel 
+              requests={requests} 
+              onSelect={setSelectedRequest}
+            />
+          </div>
 
           {/* Right Panel - Patient Details and Communication */}
-{/* Right Panel - Patient Details and Communication */}
-<div className="w-1/2">
-  {selectedRequest ? (
-    <div className="space-y-6">
-      {/* Patient Info */}
-      <PatientInfo patient={{
-        name: selectedRequest.patient.name,
-        condition: selectedRequest.patient.condition,
-        symptoms: selectedRequest.patient.symptoms,
-        status: selectedRequest.status,
-        vitals: {
-          heartRate: selectedRequest.patient.vitals?.heartRate || `${Math.floor(Math.random() * (120 - 60) + 60)} bpm`,
-          bloodPressure: selectedRequest.patient.vitals?.bloodPressure || `${Math.floor(Math.random() * (160 - 100) + 100)}/${Math.floor(Math.random() * (100 - 60) + 60)}`,
-          oxygenSaturation: selectedRequest.patient.vitals?.oxygenSaturation || `${Math.floor(Math.random() * (100 - 90) + 90)}%`,
-          temperature: selectedRequest.patient.vitals?.temperature || `${(Math.random() * (39 - 36) + 36).toFixed(1)}°C`
-        }
-      }} />
+          <div className="w-1/2">
+            {selectedRequest ? (
+              <div className="space-y-4 transition-all duration-200">
+                {/* Patient Info */}
+                <div className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow duration-200">
+                  <PatientInfo patient={{
+                    name: selectedRequest.patient.name,
+                    condition: selectedRequest.patient.condition,
+                    symptoms: selectedRequest.patient.symptoms,
+                    status: selectedRequest.status,
+                    vitals: {
+                      heartRate: selectedRequest.patient.vitals?.heartRate || `${Math.floor(Math.random() * (120 - 60) + 60)} bpm`,
+                      bloodPressure: selectedRequest.patient.vitals?.bloodPressure || `${Math.floor(Math.random() * (160 - 100) + 100)}/${Math.floor(Math.random() * (100 - 60) + 60)}`,
+                      oxygenSaturation: selectedRequest.patient.vitals?.oxygenSaturation || `${Math.floor(Math.random() * (100 - 90) + 90)}%`,
+                      temperature: selectedRequest.patient.vitals?.temperature || `${(Math.random() * (39 - 36) + 36).toFixed(1)}°C`
+                    }
+                  }} />
+                </div>
 
-      {/* Chat Component */}
-      <Chat
-       messages={messages}
-       onSendMessage={sendMessage}
-       isProcessing={isProcessing}
-       patientCondition={selectedRequest?.patient.condition}
-      />
-    </div>
-  ) : (
-    <div className="h-full flex items-center justify-center text-muted-foreground">
-      <p>Select an emergency request to view details</p>
-    </div>
-  )}
-</div>
-
+                {/* Chat Component */}
+                <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200">
+                  <Chat
+                    messages={messages}
+                    onSendMessage={sendMessage}
+                    isProcessing={isProcessing}
+                    patientCondition={selectedRequest?.patient.condition}
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="h-[calc(100vh-12rem)] flex items-center justify-center bg-white rounded-xl shadow-md">
+                <div className="text-center text-gray-500">
+                  <AlertCircle className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                  <p className="text-lg font-medium">Select an emergency request</p>
+                  <p className="text-sm text-gray-400">Choose a request from the left panel to view details</p>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </main>

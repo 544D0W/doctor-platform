@@ -1,99 +1,176 @@
 import React from 'react';
-import { motion } from 'framer-motion';
-import { Heart, Activity, Thermometer, Clock, UserRound, MapPin } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  Heart, Activity, Thermometer, Clock, UserRound, MapPin, 
+  AlertCircle, ChevronRight, Stethoscope, ArrowUpRight 
+} from 'lucide-react';
+import { cn } from "@/lib/utils";
 
-const EmergencyCard = ({ request, index, onSelect }) => {
+interface EmergencyCardProps {
+  request: any;
+  index: number;
+  onSelect: (request: any) => void;
+}
+
+const EmergencyCard = ({ request, index, onSelect }: EmergencyCardProps) => {
+  const getPriorityStyles = (priority: string) => ({
+    high: "bg-gradient-to-r from-red-500/10 to-rose-500/10 border-l-red-500 text-red-700",
+    medium: "bg-gradient-to-r from-orange-500/10 to-amber-500/10 border-l-orange-500 text-orange-700",
+    low: "bg-gradient-to-r from-green-500/10 to-emerald-500/10 border-l-green-500 text-green-700"
+  }[priority.toLowerCase()] || "");
+
+  const cardVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: {
+        type: "spring",
+        stiffness: 100,
+        damping: 15,
+        delay: index * 0.1
+      }
+    },
+    hover: { 
+      scale: 1.02,
+      boxShadow: "0 10px 30px -15px rgba(0,0,0,0.2)"
+    }
+  };
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.1 }}
-      whileHover={{ scale: 1.02, x: 5 }}
-      className="bg-gradient-to-r from-white to-gray-50 rounded-xl shadow-lg p-6 border-l-4 border-red-500"
+      variants={cardVariants}
+      initial="hidden"
+      animate="visible"
+      whileHover="hover"
+      className={cn(
+        "relative overflow-hidden",
+        "bg-white/80 backdrop-blur-sm rounded-xl",
+        "border-l-4 shadow-lg transition-all duration-300",
+        getPriorityStyles(request.priority)
+      )}
     >
-      {/* Header with Priority Badge */}
-      <div className="flex justify-between items-start">
-        <motion.div 
-          className="flex items-center gap-3"
-          whileHover={{ x: 5 }}
-        >
-          <UserRound className="w-10 h-10 text-gray-600" />
-          <div>
-            <h3 className="text-xl font-bold">{request.patient.name}</h3>
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <MapPin className="w-4 h-4" />
-              <span>Location : Abudhabi alzahya 57st golden building</span>
+      <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary/5 to-transparent rounded-bl-full" />
+
+      <div className="p-6 space-y-4">
+        {/* Header with Patient Info */}
+        <div className="flex justify-between items-start">
+          <div className="flex gap-4">
+            <motion.div 
+              whileHover={{ scale: 1.1, rotate: 10 }}
+              className="p-3 bg-primary/10 rounded-xl"
+            >
+              <UserRound className="w-8 h-8 text-primary" />
+            </motion.div>
+            <div>
+              <h3 className="text-xl font-bold text-gray-900">{request.patient.name}</h3>
+              <div className="flex items-center gap-2 mt-1 text-gray-500">
+                <MapPin className="w-4 h-4" />
+                <span className="text-sm">{request.location}</span>
+              </div>
             </div>
           </div>
-        </motion.div>
-        <motion.div
-          whileHover={{ scale: 1.1 }}
-          className="px-3 py-1 rounded-full bg-red-100 text-red-600 font-medium text-sm"
-        >
-          {request.priority}
-        </motion.div>
-      </div>
 
-      {/* Condition & Symptoms */}
-      <div className="mt-4 space-y-2">
-        <div className="p-3 rounded-lg bg-gray-50">
-          <h4 className="font-medium text-gray-700">Condition</h4>
-          <p className="text-red-600 font-semibold">{request.patient.condition}</p>
+          <motion.span
+            initial={{ x: 100 }}
+            animate={{ x: 0 }}
+            className={cn(
+              "px-3 py-1 text-xs font-semibold rounded-full",
+              getPriorityStyles(request.priority)
+            )}
+          >
+            {request.priority.toUpperCase()}
+          </motion.span>
         </div>
-        <div className="p-3 rounded-lg bg-gray-50">
-          <h4 className="font-medium text-gray-700">Symptoms</h4>
-          <p className="text-gray-600">{request.patient.symptoms}</p>
-        </div>
-      </div>
 
-      {/* Vitals Grid */}
-      <div className="mt-4 grid grid-cols-2 gap-3">
-        <motion.div 
-          whileHover={{ scale: 1.05 }}
-          className="p-3 rounded-lg bg-blue-50 border border-blue-100"
-        >
-          <div className="flex items-center gap-2 text-blue-600">
-            <Heart className="w-4 h-4" />
-            <span className="text-sm font-medium">Heart Rate</span>
+        {/* Vitals Grid */}
+        <div className="grid grid-cols-2 gap-3">
+          <VitalCard
+            icon={Heart}
+            label="Heart Rate"
+            value={`${request.patient?.vitals?.heartRate || 'N/A'} bpm`}
+            isWarning={parseInt(request.patient?.vitals?.heartRate) > 100}
+          />
+          <VitalCard
+            icon={Activity}
+            label="Blood Pressure"
+            value={request.patient?.vitals?.bloodPressure || 'N/A'}
+            isWarning={parseInt(request.patient?.vitals?.bloodPressure?.split('/')[0]) > 140}
+          />
+        </div>
+
+        {/* Condition Section */}
+        <div className="bg-primary/5 backdrop-blur-sm rounded-xl p-4 border border-primary/20">
+          <div className="flex items-center gap-2 mb-2">
+            <Stethoscope className="w-5 h-5 text-primary" />
+            <h4 className="font-medium text-gray-900">Current Condition</h4>
           </div>
-          <p className="mt-1 text-xl font-bold text-blue-700">
-            {request.patient?.vitals?.heartRate || 'N/A'} 
-            <span className="text-sm font-normal">bpm</span>
-          </p>
-        </motion.div>
-
-        <motion.div 
-          whileHover={{ scale: 1.05 }}
-          className="p-3 rounded-lg bg-green-50 border border-green-100"
-        >
-          <div className="flex items-center gap-2 text-green-600">
-            <Activity className="w-4 h-4" />
-            <span className="text-sm font-medium">Blood Pressure</span>
-          </div>
-          <p className="mt-1 text-xl font-bold text-green-700">
-            {request.patient?.vitals?.bloodPressure || 'N/A'}
-          </p>
-        </motion.div>
-      </div>
-
-      {/* Footer */}
-      <div className="mt-4 flex justify-between items-center pt-3 border-t">
-        <div className="flex items-center gap-2 text-gray-500">
-          <Clock className="w-4 h-4" />
-          <span className="text-sm">
-            {new Date(request.timestamp).toLocaleTimeString()}
-          </span>
+          <p className="text-gray-600 leading-relaxed">{request.patient.condition}</p>
         </div>
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          onClick={() => onSelect(request)}
-          className="px-4 py-2 bg-red-500 text-white rounded-full text-sm font-medium hover:bg-red-600 transition-colors"
-        >
-          View Details
-        </motion.button>
+
+        {/* Footer */}
+        <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+          <div className="flex items-center gap-2 text-gray-500">
+            <Clock className="w-4 h-4" />
+            <span className="text-sm">
+              {new Date(request.timestamp).toLocaleTimeString()}
+            </span>
+          </div>
+          <motion.button
+            whileHover={{ scale: 1.05, x: 5 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => onSelect(request)}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2",
+              "bg-primary hover:bg-primary/90",
+              "text-white rounded-full text-sm font-medium",
+              "transition-colors duration-200"
+            )}
+          >
+            View Details
+            <ArrowUpRight className="w-4 h-4" />
+          </motion.button>
+        </div>
       </div>
     </motion.div>
   );
 };
+
+const VitalCard = ({ icon: Icon, label, value, isWarning }) => (
+  <motion.div
+    whileHover={{ scale: 1.02 }}
+    className={cn(
+      "p-3 rounded-xl border backdrop-blur-sm",
+      "transition-all duration-200",
+      isWarning 
+        ? "bg-red-50/50 border-red-200" 
+        : "bg-primary/5 border-primary/20"
+    )}
+  >
+    <div className={cn(
+      "flex items-center gap-2",
+      isWarning ? "text-red-600" : "text-primary"
+    )}>
+      <Icon className="w-4 h-4" />
+      <span className="text-sm font-medium">{label}</span>
+    </div>
+    <div className="mt-2 flex items-end gap-2">
+      <p className={cn(
+        "text-lg font-bold tracking-tight",
+        isWarning ? "text-red-700" : "text-gray-900"
+      )}>
+        {value}
+      </p>
+      {isWarning && (
+        <motion.div
+          animate={{ y: [0, -4, 0] }}
+          transition={{ duration: 0.5, repeat: Infinity }}
+        >
+          <AlertCircle className="w-4 h-4 text-red-500" />
+        </motion.div>
+      )}
+    </div>
+  </motion.div>
+);
 
 export default EmergencyCard;
