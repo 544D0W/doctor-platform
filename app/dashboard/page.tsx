@@ -1,10 +1,10 @@
-'use client';
+
 
 'use client';
 
 import React, { useState, useEffect } from 'react'; // Import hooks here
 import { Bell, Brain, ArrowRight, AlertCircle } from 'lucide-react';
-import { getAIDiagnosis } from '@/services/aiService';
+import { getAIResponse } from '@/services/aiService';
 import type { EmergencyRequest, Message } from '@/types';
 import io from 'socket.io-client';
 import Header from '@/components/ui/Header';
@@ -76,45 +76,37 @@ export default function DashboardPage() {
 
   // Simulate new requests
 
-  const sendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newMessage.trim() || isProcessing || !selectedRequest) return;
+  const sendMessage = async (message: string) => {
+    if (!message.trim() || isProcessing) return;
 
     setIsProcessing(true);
     try {
-      // Add doctor's message
-      const doctorMessage: Message = {
-        id: `doc-${Date.now()}`,
-        content: newMessage,
+      // Add message to chat
+      setMessages(prev => [...prev, {
+        id: `msg-${Date.now()}`,
+        content: message,
         sender: 'doctor',
         timestamp: new Date(),
-        requestId: selectedRequest.id
-      };
-      setMessages(prev => [...prev, doctorMessage]);
-      setNewMessage('');
+        status: 'sending'
+      }]);
 
-      // Get AI response
-      const aiResponse = await getAIDiagnosis(selectedRequest.patient, newMessage);
-
-      const responseMessage: Message = {
+      const response = await getAIResponse(selectedRequest?.id, message);
+      
+      setMessages(prev => [...prev, {
         id: `ai-${Date.now()}`,
-        content: aiResponse,
-        sender: 'ambulance',
+        content: response,
+        sender: 'ai',
         timestamp: new Date(),
-        requestId: selectedRequest.id
-      };
-      setMessages(prev => [...prev, responseMessage]);
+        status: 'sent'
+      }]);
     } catch (error) {
-      console.error('Chat error:', error);
-      // Add error message
-      const errorMessage: Message = {
+      setMessages(prev => [...prev, {
         id: `error-${Date.now()}`,
-        content: "Communication error. Using standard protocols.",
-        sender: 'ambulance',
+        content: "Error processing request",
+        sender: 'system',
         timestamp: new Date(),
-        requestId: selectedRequest.id
-      };
-      setMessages(prev => [...prev, errorMessage]);
+        status: 'error'
+      }]);
     } finally {
       setIsProcessing(false);
     }

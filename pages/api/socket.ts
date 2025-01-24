@@ -2,7 +2,7 @@
 import { Server } from 'socket.io';
 import fs from 'fs';
 import path from 'path';
-
+import  aiService  from '@/services/aiService';
 const saveEmergencyData = (emergencyData: any) => {
   // Ensure data directory exists
   const dataDir = path.join(process.cwd(), 'data');
@@ -32,7 +32,18 @@ const SocketHandler = (req, res) => {
 
    io.on('connection', (socket) => {
      console.log('Client connected');
-     
+    //  socket.on('chat', async (data) => {
+    //   const response = await aiService.generateResponse(
+    //     data.conversationId,
+    //     data.message
+    //   );
+    //   socket.emit('ai-response', {
+    //     id: `ai-${Date.now()}`,
+    //     content: response,
+    //     sender: 'ai',
+    //     timestamp: new Date()
+    //   });
+    // });
      socket.on('message', (data) => {
         console.log(data);
        const emergencyData = {

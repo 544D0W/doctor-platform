@@ -24,6 +24,7 @@ interface EmergencyChatProps {
   patientCondition?: string;
 }
 
+// components/EmergencyChat.tsx
 export default function EmergencyChat({ 
   messages, 
   onSendMessage, 
@@ -47,60 +48,8 @@ export default function EmergencyChat({
     }
   };
 
-  const renderMessage = (message: Message) => {
-    const isAI = message.sender === 'ai';
-    const isSystem = message.sender === 'system';
-
-    return (
-      <div
-        key={message.id}
-        className={`flex ${isAI ? 'justify-start' : isSystem ? 'justify-center' : 'justify-end'} mb-4`}
-      >
-        <div
-          className={`
-            max-w-[80%] rounded-lg p-3 shadow-sm
-            ${isAI ? 'bg-blue-50 border border-blue-100' : 
-              isSystem ? 'bg-gray-50 border border-gray-200' : 
-              'bg-primary text-primary-foreground'}
-            ${message.status === 'error' ? 'border-red-300 bg-red-50' : ''}
-          `}
-        >
-          {message.sender === 'ai' && (
-            <div className="flex items-center gap-2 mb-1">
-              <Brain className="h-4 w-4 text-blue-500" />
-              <span className="text-xs font-medium text-blue-500">AI Assistant</span>
-            </div>
-          )}
-          
-          <p className={`text-sm ${isAI ? 'text-gray-800' : isSystem ? 'text-gray-600' : 'text-primary-foreground'}`}>
-            {message.content}
-          </p>
-          
-          <div className="flex items-center justify-between mt-1 text-xs">
-            <span className={`
-              ${isAI ? 'text-blue-400' : isSystem ? 'text-gray-400' : 'text-primary-foreground/70'}
-            `}>
-              {message.timestamp.toLocaleTimeString()}
-            </span>
-            
-            {message.status && (
-              <span className="flex items-center gap-1">
-                {message.status === 'sending' && (
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                )}
-                {message.status === 'error' && (
-                  <AlertCircle className="h-3 w-3 text-red-500" />
-                )}
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   return (
-    <Card className="h-[600px] flex flex-col bg-gradient-to-br from-white to-blue-50">
+    <Card className="h-[600px] flex flex-col overflow-hidden bg-gradient-to-br from-white to-blue-50">
       <CardHeader className="border-b backdrop-blur-sm bg-white/50">
         <motion.div 
           className="flex items-center justify-between"
@@ -121,7 +70,7 @@ export default function EmergencyChat({
         </motion.div>
       </CardHeader>
   
-      <CardContent className="flex-1 flex flex-col p-4">
+      <CardContent className="flex-1 flex flex-col p-4 min-h-0">
         <ScrollArea className="flex-1 pr-4">
           <AnimatePresence>
             {messages.map((message) => (
