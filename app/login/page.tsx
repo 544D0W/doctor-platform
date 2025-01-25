@@ -38,33 +38,32 @@ const [password, setPassword] = useState('');
     e.preventDefault();
     setIsLoading(true);
 
-    // Add simple validation
-    if (!email || !password) {
-      alert('Please fill in all fields');
-      setIsLoading(false);
-      return;
-    }
-
     try {
-      // For demo, we're using hardcoded credentials
-      // In a real app, this would be an API call
-      if (email === 'doctor@gmail.com' && password === '123') {
-        // Store auth state (In a real app, store a token)
-        localStorage.setItem('isAuthenticated', 'true');
-        localStorage.setItem('userEmail', email);
+        const response = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ email, password })
+        });
 
-        // Navigate to dashboard after successful login
+        if (!response.ok) {
+            throw new Error(await response.text());
+        }
+
+        const data = await response.json();
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('userEmail', data.doctor.email);
         router.push('/dashboard');
-      } else {
-        alert('Invalid credentials');
+
+    } catch (error: any) {
+        console.error('Login error:', error);
+        alert(error.message);
+    } finally {
         setIsLoading(false);
-      }
-    } catch (error) {
-      console.error('Login error:', error);
-      alert('An error occurred during login');
-      setIsLoading(false);
     }
-  };
+};
 
   return (
     <div className="min-h-screen bg-white relative flex">
