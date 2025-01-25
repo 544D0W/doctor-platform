@@ -134,6 +134,7 @@ export default function DashboardPage() {
             ))}
           </div>
         }
+        doctorName="Dr. John Smith"
         hasNewAlert={hasNewAlert}
         toggleNotification={toggleNotification}
       />
