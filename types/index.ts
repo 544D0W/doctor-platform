@@ -20,6 +20,11 @@ export interface Patient {
       oxygenSaturation: string;
       temperature: string;
     };
+    assignedDoctor?: {
+        id: string;
+        name: string;
+        specialization: string;
+    } | null;
   }
   
   export interface EmergencyRequest {
@@ -73,3 +78,17 @@ export interface Patient {
     timestamp: string;
     requestId: string;
   }
+
+export interface Doctor {
+  id: string;
+  name: string;
+  specialization: string;
+  type: string;
+  experience: string;
+  availability: 'Available' | 'Busy' | 'Off-duty';
+  rating: number;
+  patientsHandled: number;
+  contact: string;
+  email: string;
+  imageUrl?: string;
+}

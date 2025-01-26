@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -25,13 +27,15 @@ interface EmergencyChatProps {
   onSendMessage: (message: string) => void;
   isProcessing: boolean;
   patientCondition?: string;
+  onDoctorAssignment?: (doctor: any) => void;
 }
 
 export default function EmergencyChat({ 
   messages, 
   onSendMessage, 
   isProcessing,
-  patientCondition 
+  patientCondition,
+  onDoctorAssignment 
 }: EmergencyChatProps) {
   const [newMessage, setNewMessage] = useState('');
   const [justSent, setJustSent] = useState(false);
@@ -42,14 +46,19 @@ export default function EmergencyChat({
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (newMessage.trim() && !isProcessing) {
-      onSendMessage(newMessage.trim());
+    const messageText = newMessage.trim();
+    
+    if (messageText && !isProcessing) {
+      // Clear input and update UI immediately
       setNewMessage('');
       setJustSent(true);
-      setTimeout(() => setJustSent(false), 2000); // Reset after 2 seconds
+      setTimeout(() => setJustSent(false), 2000);
       inputRef.current?.focus();
+
+      // Send message to parent for processing
+      onSendMessage(messageText);
     }
   };
 

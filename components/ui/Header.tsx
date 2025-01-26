@@ -1,8 +1,9 @@
 import { useState, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, Search, LogOut, User } from 'lucide-react';
+import { Bell, Search, LogOut, User, UserRound } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { TextAnimate } from './text-animate';
+import Link from 'next/link';
 
 interface HeaderProps {
   notifications: React.ReactNode;
@@ -12,15 +13,17 @@ interface HeaderProps {
 }
 
 const HeaderTitle = memo(() => (
-  <TextAnimate 
-    by="character"
-    animation="blurInDown"
-    className="text-3xl font-bold text-blue-500"
-    startOnView={false}
-    once={true}
-  >
-    Emergency Dashboard
-  </TextAnimate>
+  <Link href="/dashboard" className="hover:opacity-80 transition-opacity">
+    <TextAnimate 
+      by="character"
+      animation="blurInDown"
+      className="text-3xl font-bold text-blue-500"
+      startOnView={false}
+      once={true}
+    >
+      Emergency Dashboard
+    </TextAnimate>
+  </Link>
 ));
 
 HeaderTitle.displayName = 'HeaderTitle';
@@ -47,7 +50,7 @@ export default function Header({ notifications, hasNewAlert, toggleNotification,
     <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b transition-all duration-300 hover:shadow-md">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
-        <HeaderTitle />
+          <HeaderTitle />
 
           {/* Search Section */}
           <div className="flex-1 max-w-xl mx-8">
@@ -76,6 +79,18 @@ export default function Header({ notifications, hasNewAlert, toggleNotification,
           </div>
 
           <div className="flex items-center gap-4">
+            <Link href="/doctors">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-50 text-blue-600 
+                         hover:bg-blue-100 transition-colors duration-300"
+              >
+                <UserRound className="w-4 h-4" />
+                <span className="text-sm font-medium">Doctors</span>
+              </motion.button>
+            </Link>
+
             <div className="relative">
               <motion.button
                 whileHover={{ scale: 1.1 }}

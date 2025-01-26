@@ -1,0 +1,43 @@
+{
+  "doctors": [
+    {
+      "id": "1",
+      "name": "Dr. Sarah Johnson",
+      "specialization": "Cardiologist",
+      "type": "Senior Specialist",
+      "experience": "15 years",
+      "availability": "Available",
+      "rating": 4.8,
+      "patientsHandled": 1200,
+      "contact": "+1234567890",
+      "email": "sarah.johnson@hospital.com",
+      "imageUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah"
+    },
+    {
+      "id": "2",
+      "name": "Dr. Michael Chen",
+      "specialization": "Neurologist",
+      "type": "Department Head",
+      "experience": "20 years",
+      "availability": "Available",
+      "rating": 4.9,
+      "patientsHandled": 1500,
+      "contact": "+1234567891",
+      "email": "michael.chen@hospital.com",
+      "imageUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=Michael"
+    },
+    {
+      "id": "3",
+      "name": "Dr. Smith",
+      "specialization": "Emergency Medicine",
+      "type": "Senior Specialist",
+      "experience": "12 years",
+      "availability": "Busy",
+      "rating": 4.7,
+      "patientsHandled": 1000,
+      "contact": "+1234567892",
+      "email": "smith@hospital.com",
+      "imageUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=Smith"
+    }
+  ]
+}

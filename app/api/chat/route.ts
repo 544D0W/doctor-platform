@@ -1,7 +1,7 @@
 // app/api/chat/route.ts
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
-import { readFileSync, readdirSync, statSync } from 'fs';
+import { readFileSync, readdirSync, statSync, writeFileSync } from 'fs';
 import path from 'path';
 import twilio from 'twilio';
 
@@ -50,6 +50,54 @@ function getLatestTrainingData() {
   }
 }
 
+function getDoctors() {
+  const doctorsFile = path.join(process.cwd(), 'data', 'doctors.json');
+  return JSON.parse(readFileSync(doctorsFile, 'utf8'));
+}
+
+function updateDoctorStatus(doctorId: string, status: string) {
+  const doctorsFile = path.join(process.cwd(), 'data', 'doctors.json');
+  const doctorsData = getDoctors();
+  
+  doctorsData.doctors = doctorsData.doctors.map((doctor: any) => 
+    doctor.id === doctorId ? { ...doctor, availability: status } : doctor
+  );
+  
+  writeFileSync(doctorsFile, JSON.stringify(doctorsData, null, 2));
+  return doctorsData.doctors.find((doctor: any) => doctor.id === doctorId);
+}
+
+function findAvailableDoctor(specialization: string) {
+  const doctorsData = getDoctors();
+  return doctorsData.doctors.find((doctor: any) => 
+    doctor.specialization === specialization && 
+    doctor.availability === "Available"
+  );
+}
+
+function handleDoctorAssignment(aiResponse: string | null) {
+  if (!aiResponse) return null;
+  
+  if (aiResponse.toLowerCase().includes("doctor assigned to patient") || 
+      aiResponse.toLowerCase().includes("assign available doctor")) {
+    // Find an available doctor (preferably Dr. Smith for this case)
+    const doctor = findAvailableDoctor("Emergency Medicine");
+    
+    if (!doctor) {
+      return null;
+    }
+
+    // Update the doctor's status to Busy
+    const updatedDoctor = updateDoctorStatus(doctor.id, "Busy");
+    
+    return {
+      type: "ASSIGN_DOCTOR",
+      doctor: updatedDoctor
+    };
+  }
+  return null;
+}
+
 export async function POST(req: Request) {
   const { message, patientId, doctorPhone } = await req.json();
   const trainingData = getLatestTrainingData();
@@ -61,6 +109,7 @@ export async function POST(req: Request) {
         {
           role: 'system',
           content: `You are a medical AI assistant. Use the provided training data to format responses. 
+                   Only respond with "Doctor assigned to patient [patient_name]" when explicitly asked to assign a doctor.
                    If you detect the doctor saying they are busy or need a call, respond with: 
                    "CALL_REQUIRED: [patient context]"`
         },
@@ -76,12 +125,22 @@ export async function POST(req: Request) {
 
     const aiResponse = response.choices[0].message.content;
 
+    // Check for doctor assignment only if explicitly requested
+    const assignmentAction = handleDoctorAssignment(aiResponse);
+    if (assignmentAction) {
+      return NextResponse.json({ 
+        response: aiResponse,
+        action: assignmentAction
+      });
+    }
+
     // Check if call is required
     if (aiResponse?.startsWith('CALL_REQUIRED:')) {
       if (doctorPhone) {
         await makeCall(doctorPhone, message);
         return NextResponse.json({ 
-          response: "Call initiated to doctor. " + aiResponse.replace('CALL_REQUIRED:', '')
+          response: "Call initiated to doctor. " + aiResponse.replace('CALL_REQUIRED:', ''),
+          action: { type: "MAKE_CALL" }
         });
       }
     }

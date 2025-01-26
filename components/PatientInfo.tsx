@@ -7,12 +7,19 @@ import {
   UserRound, UserCircle, Calendar, Users, Activity,
   Phone, MapPin, AlertCircle, Clock
 } from 'lucide-react';
+import AssignDoctorSection from './AssignDoctorSection';
+import { useState, useEffect, useRef } from "react";
+import { useDoctors } from '@/context/DoctorContext';
 
 interface PatientInfoProps {
   patient: Patient;
 }
 
 export default function PatientInfo({ patient }: PatientInfoProps) {
+  const [currentPatient, setCurrentPatient] = useState(patient);
+  const assignDoctorRef = useRef<{ assignDoctor: () => void }>(null);
+  const { updateDoctorStatus } = useDoctors();
+
   const patientDetails = [
     { 
       label: "Name", 
@@ -43,6 +50,23 @@ export default function PatientInfo({ patient }: PatientInfoProps) {
       bgColor: "bg-emerald-50"
     }
   ];
+
+  const handleAssignDoctor = async (doctorData: { id: string; name: string; specialization: string }) => {
+    // Update the doctor's status to Busy when assigned
+    updateDoctorStatus(doctorData.id, 'Busy');
+    setCurrentPatient(prev => ({
+      ...prev,
+      assignedDoctor: doctorData
+    }));
+  };
+
+  // Function to be called when AI suggests a doctor
+  const handleAIAssignment = (aiMessage: string) => {
+    if (aiMessage.includes("Doctor assigned to patient")) {
+      // Trigger the assignment through the ref
+      assignDoctorRef.current?.assignDoctor();
+    }
+  };
 
   return (
     <motion.div
@@ -122,6 +146,10 @@ export default function PatientInfo({ patient }: PatientInfoProps) {
           </motion.div>
           <VitalsCard vitals={patient.vitals} />
           <MedicalHistoryCard patient={patient} />
+          <AssignDoctorSection 
+            patient={patient}
+            onAssignDoctor={() => {}}
+          />
         </CardContent>
       </Card>
     </motion.div>
