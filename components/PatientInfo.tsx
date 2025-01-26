@@ -30,14 +30,14 @@ export default function PatientInfo({ patient }: PatientInfoProps) {
     },
     { 
       label: "Gender", 
-      value: patient.gender || "Not specified", 
+      value: patient.gender || "Male", 
       icon: Users,
       color: "text-teal-600",
       bgColor: "bg-teal-50"
     },
     { 
       label: "Contact", 
-      value: patient.contact || "Not available", 
+      value: patient.contact || "052711889", 
       icon: Phone,
       color: "text-emerald-600",
       bgColor: "bg-emerald-50"
@@ -120,7 +120,6 @@ export default function PatientInfo({ patient }: PatientInfoProps) {
               </motion.div>
             ))}
           </motion.div>
-  
           <VitalsCard vitals={patient.vitals} />
           <MedicalHistoryCard patient={patient} />
         </CardContent>

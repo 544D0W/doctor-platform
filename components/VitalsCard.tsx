@@ -36,7 +36,7 @@ export default function VitalsCard({ vitals }: VitalsCardProps) {
     },
     {
       label: "Temperature",
-      value: `${vitals.temperature}°C`,
+      value: `${vitals.temperature}`,
       icon: Thermometer,
       normalRange: "36.5-37.5°C",
       status: parseFloat(vitals.temperature) > 38 ? 'warning' : 'normal',
@@ -46,7 +46,7 @@ export default function VitalsCard({ vitals }: VitalsCardProps) {
     },
     {
       label: "O₂ Saturation",
-      value: `${vitals.oxygenSaturation}%`,
+      value: `${vitals.oxygenSaturation}`,
       icon: Wind,
       normalRange: "≥ 95%",
       status: parseInt(vitals.oxygenSaturation) < 95 ? 'warning' : 'normal',

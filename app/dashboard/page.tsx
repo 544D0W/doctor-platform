@@ -158,11 +158,12 @@ export default function DashboardPage() {
                 <div className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow duration-200">
                   <PatientInfo patient={{
                     name: selectedRequest.patient.name,
+                    age: selectedRequest.patient.age,
                     condition: selectedRequest.patient.condition,
                     symptoms: selectedRequest.patient.symptoms,
                     status: selectedRequest.status,
                     vitals: {
-                      heartRate: selectedRequest.patient.vitals?.heartRate || `${Math.floor(Math.random() * (120 - 60) + 60)} bpm`,
+                      heartRate: selectedRequest.patient.bpm || `${Math.floor(Math.random() * (120 - 60) + 60)} bpm`,
                       bloodPressure: selectedRequest.patient.vitals?.bloodPressure || `${Math.floor(Math.random() * (160 - 100) + 100)}/${Math.floor(Math.random() * (100 - 60) + 60)}`,
                       oxygenSaturation: selectedRequest.patient.vitals?.oxygenSaturation || `${Math.floor(Math.random() * (100 - 90) + 90)}%`,
                       temperature: selectedRequest.patient.vitals?.temperature || `${(Math.random() * (39 - 36) + 36).toFixed(1)}°C`

@@ -27,6 +27,8 @@ export interface Patient {
     patient: {
       id: string;
       name: string;
+      age?: string;
+      bpm?: string;
       condition: string;
       symptoms: string;
       paramedics_tips: string;
@@ -36,6 +38,12 @@ export interface Patient {
         painkillers?: string;
       };
       conversation?: string[];
+      vitals?: {
+        heartRate: string;
+        bloodPressure: string;
+        oxygenSaturation: string;
+        temperature: string;
+      };
     };
     diagnosis: {
       patient: {
