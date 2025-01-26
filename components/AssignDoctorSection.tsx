@@ -19,8 +19,8 @@ export type AssignDoctorRef = {
   assignDoctor: () => void;
 };
 
-const AssignDoctorSection = forwardRef<AssignDoctorRef, AssignDoctorSectionProps>(({ 
-  patient, 
+const AssignDoctorSection = forwardRef<AssignDoctorRef, AssignDoctorSectionProps>(({
+  patient,
   onAssignDoctor,
   autoAssign = false,
   doctorToAssign,
@@ -32,12 +32,13 @@ const AssignDoctorSection = forwardRef<AssignDoctorRef, AssignDoctorSectionProps
   const handleAssignDoctor = async () => {
     setIsAssigning(true);
     setError(null);
+    
     try {
-      const matchedDoctor = suggestedDoctor 
-        ? await findAvailableDoctor(patient.condition, patient.symptoms || '', suggestedDoctor)
-        : doctorToAssign 
-        ? await findAvailableDoctor(patient.condition, patient.symptoms || '', doctorToAssign)
-        : await findAvailableDoctor(patient.condition, patient.symptoms || '');
+      const matchedDoctor = await findAvailableDoctor(
+        patient.condition, 
+        'Not specified', 
+        suggestedDoctor || doctorToAssign
+      );
 
       const result = await assignDoctorToPatient(patient.id, matchedDoctor.id);
       
@@ -52,7 +53,6 @@ const AssignDoctorSection = forwardRef<AssignDoctorRef, AssignDoctorSectionProps
     }
   };
 
-  // Expose the assignDoctor function through the ref
   useImperativeHandle(ref, () => ({
     assignDoctor: handleAssignDoctor
   }));
@@ -91,6 +91,7 @@ const AssignDoctorSection = forwardRef<AssignDoctorRef, AssignDoctorSectionProps
           </Button>
         </div>
       )}
+      
       {error && (
         <p className="text-red-500 text-sm mt-2">{error}</p>
       )}
@@ -100,4 +101,4 @@ const AssignDoctorSection = forwardRef<AssignDoctorRef, AssignDoctorSectionProps
 
 AssignDoctorSection.displayName = 'AssignDoctorSection';
 
-export default AssignDoctorSection; 
+export default AssignDoctorSection;

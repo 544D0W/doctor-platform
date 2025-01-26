@@ -2,14 +2,14 @@
   "doctors": [
     {
       "id": "1",
-      "name": "Dr. Sarah Johnson",
+      "name": "Dr. Soufiane Chami",
       "specialization": "Cardiologist",
       "type": "Senior Specialist",
       "experience": "15 years",
       "availability": "Available",
       "rating": 4.8,
       "patientsHandled": 1200,
-      "contact": "+1234567890",
+      "contact": "+971582863584",
       "email": "sarah.johnson@hospital.com",
       "imageUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah"
     },

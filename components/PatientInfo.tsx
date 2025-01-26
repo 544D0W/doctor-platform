@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Patient } from '@/types';
+import { Patient, Doctor } from '@/types';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import VitalsCard from '@/components/VitalsCard';
 import MedicalHistoryCard from '@/components/MedicalHistoryCard';
@@ -23,47 +23,48 @@ export default function PatientInfo({ patient }: PatientInfoProps) {
   const patientDetails = [
     { 
       label: "Name", 
-      value: patient.name, 
+      value: currentPatient.name, 
       icon: UserCircle,
       color: "text-blue-600",
       bgColor: "bg-blue-50"
     },
     { 
       label: "Age", 
-      value: `${patient.age} years`, 
+      value: `${currentPatient.age} years`, 
       icon: Calendar,
       color: "text-purple-600",
       bgColor: "bg-purple-50"
     },
     { 
       label: "Gender", 
-      value: patient.gender || "Male", 
+      value: currentPatient.gender || "Male", 
       icon: Users,
       color: "text-teal-600",
       bgColor: "bg-teal-50"
     },
     { 
       label: "Contact", 
-      value: patient.contact || "052711889", 
+      value: currentPatient.contact || "052711889", 
       icon: Phone,
       color: "text-emerald-600",
       bgColor: "bg-emerald-50"
     }
   ];
 
-  const handleAssignDoctor = async (doctorData: { id: string; name: string; specialization: string }) => {
-    // Update the doctor's status to Busy when assigned
-    updateDoctorStatus(doctorData.id, 'Busy');
+  const handleAssignDoctor = async (doctor: Doctor) => {
+    updateDoctorStatus(doctor.id, 'Busy');
     setCurrentPatient(prev => ({
       ...prev,
-      assignedDoctor: doctorData
+      assignedDoctor: {
+        id: doctor.id,
+        name: doctor.name,
+        specialization: doctor.specialization
+      }
     }));
   };
 
-  // Function to be called when AI suggests a doctor
   const handleAIAssignment = (aiMessage: string) => {
     if (aiMessage.includes("Doctor assigned to patient")) {
-      // Trigger the assignment through the ref
       assignDoctorRef.current?.assignDoctor();
     }
   };
@@ -88,7 +89,7 @@ export default function PatientInfo({ patient }: PatientInfoProps) {
                 <CardTitle className="font-bold text-2xl">Patient Information</CardTitle>
                 <div className="flex items-center gap-2 mt-1 text-sm text-gray-500">
                   <MapPin className="w-4 h-4" />
-                  <span>{patient.location || "Location not available"}</span>
+                  <span>{currentPatient.location || "Location not available"}</span>
                 </div>
               </div>
             </div>
@@ -100,7 +101,6 @@ export default function PatientInfo({ patient }: PatientInfoProps) {
         </CardHeader>
   
         <CardContent className="space-y-8 p-6">
-          {/* Current Condition Alert */}
           <motion.div 
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -112,10 +112,9 @@ export default function PatientInfo({ patient }: PatientInfoProps) {
               </div>
               <h3 className="font-semibold text-red-700">Current Condition</h3>
             </div>
-            <p className="text-red-600">{patient.condition}</p>
+            <p className="text-red-600">{currentPatient.condition}</p>
           </motion.div>
 
-          {/* Patient Details Grid */}
           <motion.div 
             className="grid grid-cols-2 gap-4"
             initial={{ opacity: 0, y: 20 }}
@@ -144,11 +143,12 @@ export default function PatientInfo({ patient }: PatientInfoProps) {
               </motion.div>
             ))}
           </motion.div>
-          <VitalsCard vitals={patient.vitals} />
-          <MedicalHistoryCard patient={patient} />
+          <VitalsCard vitals={currentPatient.vitals} />
+          <MedicalHistoryCard patient={currentPatient} />
           <AssignDoctorSection 
-            patient={patient}
-            onAssignDoctor={() => {}}
+            ref={assignDoctorRef}
+            patient={currentPatient}
+            onAssignDoctor={handleAssignDoctor}
           />
         </CardContent>
       </Card>
