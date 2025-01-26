@@ -3,10 +3,11 @@
 import { useState, useEffect } from 'react';
 import { Heart, Lock, Mail, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { InteractiveGridPattern } from '@/components/ui/interactive-grid-pattern';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
-const [password, setPassword] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
@@ -14,20 +15,14 @@ const [password, setPassword] = useState('');
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       const decorativeSection = document.querySelector('.decorative-section');
+      if (!decorativeSection || !(decorativeSection instanceof HTMLElement)) return;
       
-      // Safeguard against null/undefined
-      if (!decorativeSection) return;
-  
-      // Type-safe check for HTMLElement
-      if (decorativeSection instanceof HTMLElement) {
-        const rect = decorativeSection.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        
-        // Safe style property access
-        decorativeSection.style.setProperty('--mouse-x', `${x}px`);
-        decorativeSection.style.setProperty('--mouse-y', `${y}px`);
-      }
+      const rect = decorativeSection.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      decorativeSection.style.setProperty('--mouse-x', `${x}px`);
+      decorativeSection.style.setProperty('--mouse-y', `${y}px`);
     };
   
     window.addEventListener('mousemove', handleMouseMove);
@@ -39,37 +34,33 @@ const [password, setPassword] = useState('');
     setIsLoading(true);
 
     try {
-        const response = await fetch('/api/auth/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({ email, password })
-        });
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+      });
 
-        if (!response.ok) {
-            throw new Error(await response.text());
-        }
+      if (!response.ok) {
+        throw new Error(await response.text());
+      }
 
-        const data = await response.json();
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('userEmail', data.doctor.email);
-        router.push('/dashboard');
-
+      const data = await response.json();
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('userEmail', data.doctor.email);
+      router.push('/dashboard');
     } catch (error: any) {
-        console.error('Login error:', error);
-        alert(error.message);
+      console.error('Login error:', error);
+      alert(error.message);
     } finally {
-        setIsLoading(false);
+      setIsLoading(false);
     }
-};
+  };
 
   return (
     <div className="min-h-screen bg-white relative flex">
-      {/* Background decoration */}
-      <div className="fixed inset-0 bg-slate-50 bg-grid bg-grid-pattern opacity-50" />
-
       {/* Login container */}
       <div className="relative flex w-full flex-col md:flex-row">
         {/* Form section */}
@@ -77,13 +68,11 @@ const [password, setPassword] = useState('');
           <div className="w-full max-w-sm">
             {/* Enhanced Animated Logo/Header */}
             <div className="relative mb-12 group">
-              {/* Multi-layered glow effect */}
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 pointer-events-none">
                 <div className="h-16 w-16 bg-red-500/30 animate-glow blur-2xl rounded-full" />
                 <div className="absolute inset-0 h-16 w-16 bg-blue-500/20 animate-glow blur-2xl rounded-full" style={{ animationDelay: '1s' }} />
               </div>
               
-              {/* Floating heart container */}
               <div className="relative flex justify-center animate-float">
                 <div className="rounded-full bg-gradient-to-r from-red-50 to-pink-50 p-4 group-hover:from-red-100 group-hover:to-pink-100 transition-colors duration-300 shine">
                   <Heart className="h-8 w-8 text-red-500 animate-heartbeat relative z-10" />
@@ -109,10 +98,10 @@ const [password, setPassword] = useState('');
                       <Mail className="h-5 w-5 text-gray-400 group-hover:text-red-500 transition-colors duration-200" />
                     </div>
                     <input
-                       type="email"
-                       value={email}
-                       onChange={(e) => setEmail(e.target.value)}
-                       required
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
                       className="block w-full rounded-lg border border-gray-200 pl-10 px-3 py-3 text-gray-900 placeholder-gray-500 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20 sm:text-sm"
                       placeholder="Email address"
                     />
@@ -126,10 +115,10 @@ const [password, setPassword] = useState('');
                       <Lock className="h-5 w-5 text-gray-400 group-hover:text-red-500 transition-colors duration-200" />
                     </div>
                     <input
-                       type="password"
-                       value={password}
-                       onChange={(e) => setPassword(e.target.value)}
-                       required
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
                       className="block w-full rounded-lg border border-gray-200 pl-10 px-3 py-3 text-gray-900 placeholder-gray-500 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20 sm:text-sm"
                       placeholder="Password"
                     />
@@ -178,12 +167,21 @@ const [password, setPassword] = useState('');
           </div>
         </div>
 
-        {/* Enhanced decorative section */}
+        {/* Decorative section */}
         <div className="relative hidden flex-1 md:flex decorative-section overflow-hidden">
           <div className="absolute inset-0">
             {/* Enhanced gradient background */}
             <div className="absolute inset-0 bg-gradient-to-t from-red-500/30 via-blue-500/30 to-purple-500/30 animate-gradient" />
-            <div className="absolute inset-0 bg-grid opacity-10" />
+            
+            {/* Interactive Grid Pattern */}
+            <InteractiveGridPattern 
+      width={40}
+      height={40}
+      squares={[24, 24]}
+      className="!absolute inset-0 mix-blend-overlay pointer-events-auto z-10"
+      squaresClassName="hover:fill-white/20"
+    />
+            
             <div className="absolute inset-0 mouse-trail transition-opacity duration-300" />
             
             {/* Interactive particles */}
