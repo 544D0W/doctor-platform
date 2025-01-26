@@ -113,40 +113,48 @@ function findAvailableDoctor(specialization: string) {
   return null;
 }
 
-function handleDoctorAssignment(aiResponse: string | null, patientId: string) {
+function handleDoctorAssignment(aiResponse: string | null, conversationId: string) {
   if (!aiResponse) return null;
   
   if (aiResponse.toLowerCase().includes("doctor assigned to patient") || 
       aiResponse.toLowerCase().includes("assign available doctor")) {
-    console.log('Doctor assignment triggered for patient:', patientId);
+    console.log('Doctor assignment triggered for conversation:', conversationId);
     
-    // Find an available doctor (preferably Dr. Smith for this case)
-    const doctor = findAvailableDoctor("Cardiologist");
+    // Find patient_id from emergency files
+    const dataDir = path.join(process.cwd(), 'data');
+    const files = readdirSync(dataDir).filter(file => 
+      file.startsWith('emergency_') && file.endsWith('.json')
+    );
     
-    if (!doctor) {
-      console.log('No available doctor found');
+    let patientId = null;
+    for (const file of files) {
+      try {
+        const fileData = JSON.parse(readFileSync(path.join(dataDir, file), 'utf8'));
+        if (fileData.id === conversationId) {
+          patientId = fileData.patient_id;
+          break;
+        }
+      } catch (err) {
+        console.error(`Error reading file ${file}:`, err);
+      }
+    }
+
+    if (!patientId) {
+      console.log('No matching patient found for conversation:', conversationId);
       return null;
     }
 
-    // Update the doctor's status to Busy
-    const updatedDoctor = updateDoctorStatus(doctor.id, "Busy");
+    const doctor = findAvailableDoctor("Cardiologist");
+    if (!doctor) return null;
 
-    // Extract patient name from AI response or use a default
+    const updatedDoctor = updateDoctorStatus(doctor.id, "Busy");
     const patientNameMatch = aiResponse.match(/patient\s+([^.]+)/i);
     const patientName = patientNameMatch ? patientNameMatch[1].trim() : "New Patient";
 
-    console.log('Making call for:', { doctor: updatedDoctor.name, patient: patientName });
-
-    // Make the call to the assigned doctor with proper parameters
-    // Change from .catch to await to ensure the call is made
     try {
-      makeCall(updatedDoctor.contact, updatedDoctor.name, patientName, patientId)
-        .then(result => {
-          console.log('Call successfully initiated:', result);
-        })
-        .catch(error => {
-          console.error('Failed to make call:', error);
-        });
+      makeCall(updatedDoctor.contact, updatedDoctor.name, patientName, String(patientId))
+        .then(result => console.log('Call initiated:', result))
+        .catch(error => console.error('Call failed:', error));
     } catch (error) {
       console.error('Error in makeCall:', error);
     }
