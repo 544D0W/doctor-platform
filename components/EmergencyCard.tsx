@@ -88,13 +88,13 @@ const EmergencyCard = ({ request, index, onSelect }: EmergencyCardProps) => {
           <VitalCard
             icon={Heart}
             label="Heart Rate"
-            value={`${request.patient?.vitals?.heartRate || 'N/A'} bpm`}
+            value={`${request.patient.bpm || 'N/A'} bpm`}
             isWarning={parseInt(request.patient?.vitals?.heartRate) > 100}
           />
           <VitalCard
             icon={Activity}
-            label="Blood Pressure"
-            value={request.patient?.vitals?.bloodPressure || 'N/A'}
+            label="Age"
+            value={`${request.patient.age || 'N/A'} years`}
             isWarning={parseInt(request.patient?.vitals?.bloodPressure?.split('/')[0]) > 140}
           />
         </div>
