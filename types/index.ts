@@ -9,6 +9,7 @@ export interface SocketAuth {
 }
 
 export interface Patient {
+    patient_id: number;
     id: string;
     name: string;
     age: number;

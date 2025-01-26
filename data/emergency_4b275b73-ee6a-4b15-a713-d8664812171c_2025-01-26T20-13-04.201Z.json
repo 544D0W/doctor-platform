@@ -1,4 +1,5 @@
 {
+  "patient_id": 13,
   "id": "4b275b73-ee6a-4b15-a713-d8664812171c",
   "patient": {
     "id": "4b275b73-ee6a-4b15-a713-d8664812171c",
@@ -13,7 +14,7 @@
     "name": "Mohamed Ali",
     "age": "32",
     "competence": "Concious",
-    "bpm": "112"
+    "bpm": "52"
   },
   "diagnosis": {
     "patient": {
@@ -28,11 +29,11 @@
     },
     "conversation_status": "DIAGNOSED",
     "diagnosed_by": "Mohamed Al Mehairbi",
-    "timestamp": "2025-01-26 19:13:55",
+    "timestamp": "2025-01-27 00:13:04",
     "_date": "25-01-2025",
     "status": "DIAGNOSED"
   },
   "priority": "high",
-  "timestamp": "2025-01-26 19:13:55",
+  "timestamp": "2025-01-27 00:13:04",
   "status": "diagnosed"
 }
