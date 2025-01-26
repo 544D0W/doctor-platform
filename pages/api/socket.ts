@@ -35,6 +35,7 @@ const SocketHandler = (req, res) => {
         console.log(data);
         
         const emergencyData = {
+          patient_id: data.patient_id,
           id: data.conversation_id,
           patient: {
             id: data.loggedData._id,
