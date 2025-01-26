@@ -30,6 +30,23 @@ interface EmergencyChatProps {
   onDoctorAssignment?: (doctor: any) => void;
 }
 
+function formatMessage(content: string) {
+  // Format contact information in a special way
+  if (content.includes("Contact Information:")) {
+    const [message, contactInfo] = content.split("\n\nContact Information:");
+    return (
+      <>
+        <p>{message}</p>
+        <div className="mt-2 p-2 bg-blue-50 rounded-md">
+          <p className="text-blue-700 font-medium">📞 Contact Information:</p>
+          <p className="text-blue-600">{contactInfo}</p>
+        </div>
+      </>
+    );
+  }
+  return <p>{content}</p>;
+}
+
 export default function EmergencyChat({ 
   messages, 
   onSendMessage, 
@@ -104,31 +121,14 @@ export default function EmergencyChat({
       <CardContent className="flex-1 flex flex-col p-4 min-h-0">
         <ScrollArea className="flex-1 pr-4">
           <div className="space-y-4">
-            {messages.map((message, index) => (
-              <motion.div
-                key={`${message.id}-${index}`}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <div className={`flex items-start gap-3 ${
-                  message.sender === 'doctor' ? 'justify-end' : 'justify-start'
-                }`}>
-                  {message.sender === 'ai' && (
-                    <div className="p-2 bg-violet-100 rounded-full">
-                      <Brain className="w-4 h-4 text-violet-500" />
-                    </div>
-                  )}
-                  {message.sender === 'doctor' && (
-                    <div className="p-2 bg-rose-100 rounded-full order-last">
-                      <User className="w-4 h-4 text-rose-500" />
-                    </div>
-                  )}
-                  <div className="message-content">
-                    <FormattedMedicalText text={message.content} />
-                  </div>
-                </div>
-              </motion.div>
+            {messages.map((message) => (
+              <MessageBubble
+                key={message.id}
+                message={{
+                  ...message,
+                  content: formatMessage(message.content)
+                }}
+              />
             ))}
           </div>
           <div ref={scrollRef} />

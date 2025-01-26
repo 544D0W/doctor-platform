@@ -3,27 +3,45 @@ import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import { readFileSync, readdirSync, statSync, writeFileSync } from 'fs';
 import path from 'path';
-import twilio from 'twilio';
 
 const client = new OpenAI({
   apiKey: process.env.SAMBANOVA_API_KEY!,
   baseURL: 'https://api.sambanova.ai/v1'
 });
 
-const twilioClient = twilio(
-  process.env.TWILIO_ACCOUNT_SID!,
-  process.env.TWILIO_AUTH_TOKEN!
-);
-
-async function makeCall(doctorPhone: string, message: string) {
-  const twiml = new twilio.twiml.VoiceResponse();
-  twiml.say({ voice: 'alice' }, `Urgent message regarding patient: ${message}`);
+async function makeCall(doctorPhone: string, doctorName: string, patientName: string, patientId: string) {
+  console.log('Initiating call with params:', { doctorPhone, doctorName, patientName, patientId });
   
-  return twilioClient.calls.create({
-    twiml: twiml.toString(),
-    to: doctorPhone,
-    from: process.env.TWILIO_PHONE_NUMBER!
-  });
+  try {
+    const response = await fetch('https://rain.ngrok.app/make-call/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        dr_name: doctorName,
+        patient_name: patientName,
+        patient_id: patientId,
+        number: doctorPhone
+      })
+    });
+
+    console.log('Call API response status:', response.status);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Call API error:', errorText);
+      throw new Error(`Failed to initiate call: ${errorText}`);
+    }
+
+    const result = await response.json();
+    console.log('Call API success:', result);
+    return result;
+  } catch (error) {
+    console.error('Error making call:', error);
+    throw error;
+  }
 }
 
 function getLatestTrainingData() {
@@ -69,37 +87,81 @@ function updateDoctorStatus(doctorId: string, status: string) {
 
 function findAvailableDoctor(specialization: string) {
   const doctorsData = getDoctors();
-  return doctorsData.doctors.find((doctor: any) => 
+  
+  // First try to find a doctor with the exact specialization
+  const exactMatch = doctorsData.doctors.find((doctor: any) => 
     doctor.specialization === specialization && 
     doctor.availability === "Available"
   );
+
+  if (exactMatch) {
+    return exactMatch;
+  }
+
+  // If no exact match, find any available doctor
+  console.log('No exact specialty match, looking for any available doctor');
+  const anyAvailable = doctorsData.doctors.find((doctor: any) => 
+    doctor.availability === "Available"
+  );
+
+  if (anyAvailable) {
+    console.log('Found available doctor:', anyAvailable.name);
+    return anyAvailable;
+  }
+
+  console.log('No available doctors found at all');
+  return null;
 }
 
-function handleDoctorAssignment(aiResponse: string | null) {
+function handleDoctorAssignment(aiResponse: string | null, patientId: string) {
   if (!aiResponse) return null;
   
   if (aiResponse.toLowerCase().includes("doctor assigned to patient") || 
       aiResponse.toLowerCase().includes("assign available doctor")) {
+    console.log('Doctor assignment triggered for patient:', patientId);
+    
     // Find an available doctor (preferably Dr. Smith for this case)
-    const doctor = findAvailableDoctor("Emergency Medicine");
+    const doctor = findAvailableDoctor("Cardiologist");
     
     if (!doctor) {
+      console.log('No available doctor found');
       return null;
     }
 
     // Update the doctor's status to Busy
     const updatedDoctor = updateDoctorStatus(doctor.id, "Busy");
+
+    // Extract patient name from AI response or use a default
+    const patientNameMatch = aiResponse.match(/patient\s+([^.]+)/i);
+    const patientName = patientNameMatch ? patientNameMatch[1].trim() : "New Patient";
+
+    console.log('Making call for:', { doctor: updatedDoctor.name, patient: patientName });
+
+    // Make the call to the assigned doctor with proper parameters
+    // Change from .catch to await to ensure the call is made
+    try {
+      makeCall(updatedDoctor.contact, updatedDoctor.name, patientName, patientId)
+        .then(result => {
+          console.log('Call successfully initiated:', result);
+        })
+        .catch(error => {
+          console.error('Failed to make call:', error);
+        });
+    } catch (error) {
+      console.error('Error in makeCall:', error);
+    }
     
     return {
       type: "ASSIGN_DOCTOR",
-      doctor: updatedDoctor
+      doctor: updatedDoctor,
+      message: `Doctor ${updatedDoctor.name} has been assigned and notified.`
     };
   }
   return null;
 }
 
 export async function POST(req: Request) {
-  const { message, patientId, doctorPhone } = await req.json();
+  const { message, patientId } = await req.json();
   const trainingData = getLatestTrainingData();
 
   try {
@@ -125,19 +187,25 @@ export async function POST(req: Request) {
 
     const aiResponse = response.choices[0].message.content;
 
-    // Check for doctor assignment only if explicitly requested
-    const assignmentAction = handleDoctorAssignment(aiResponse);
+    // Check for doctor assignment
+    const assignmentAction = handleDoctorAssignment(aiResponse, patientId);
     if (assignmentAction) {
+      const contactInfo = `
+Contact Information:
+Doctor: ${assignmentAction.doctor.name}
+Specialization: ${assignmentAction.doctor.specialization}
+Phone: ${assignmentAction.doctor.contact}
+Email: ${assignmentAction.doctor.email}`;
+
       return NextResponse.json({ 
-        response: aiResponse,
+        response: `${aiResponse}\n\n${contactInfo}`,
         action: assignmentAction
       });
     }
 
     // Check if call is required
     if (aiResponse?.startsWith('CALL_REQUIRED:')) {
-      if (doctorPhone) {
-        await makeCall(doctorPhone, message);
+      if (assignmentAction) {
         return NextResponse.json({ 
           response: "Call initiated to doctor. " + aiResponse.replace('CALL_REQUIRED:', ''),
           action: { type: "MAKE_CALL" }

@@ -2,14 +2,14 @@
   "doctors": [
     {
       "id": "1",
-      "name": "Dr. Soufiane Chami",
+      "name": "Dr. Sarah Johnson",
       "specialization": "Cardiologist",
       "type": "Senior Specialist",
       "experience": "15 years",
-      "availability": "Available",
+      "availability": "Busy",
       "rating": 4.8,
       "patientsHandled": 1200,
-      "contact": "+971582863584",
+      "contact": "+971585794242",
       "email": "sarah.johnson@hospital.com",
       "imageUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah"
     },
@@ -19,10 +19,10 @@
       "specialization": "Neurologist",
       "type": "Department Head",
       "experience": "20 years",
-      "availability": "Available",
+      "availability": "Busy",
       "rating": 4.9,
       "patientsHandled": 1500,
-      "contact": "+1234567891",
+      "contact": "+971582863585",
       "email": "michael.chen@hospital.com",
       "imageUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=Michael"
     },
@@ -35,7 +35,7 @@
       "availability": "Busy",
       "rating": 4.7,
       "patientsHandled": 1000,
-      "contact": "+1234567892",
+      "contact": "+971582863586",
       "email": "smith@hospital.com",
       "imageUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=Smith"
     }
