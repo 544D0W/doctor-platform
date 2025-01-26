@@ -65,8 +65,7 @@ const EmergencyCard = ({ request, index, onSelect }: EmergencyCardProps) => {
             <div>
               <h3 className="text-xl font-bold text-gray-900">{request.patient.name}</h3>
               <div className="flex items-center gap-2 mt-1 text-gray-500">
-                <MapPin className="w-4 h-4" />
-                <span className="text-sm">{request.location}</span>
+                <span className="text-sm">ID: {request.patient_id}</span>
               </div>
             </div>
           </div>
