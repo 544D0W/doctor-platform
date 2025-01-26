@@ -1,5 +1,5 @@
 {
-  "patient_id": 4,
+  "patient_id": 3,
   "id": "4b275b73-ee6a-4b15-a713-d8664812171c",
   "patient": {
     "id": "4b275b73-ee6a-4b15-a713-d8664812171c",
@@ -11,10 +11,10 @@
       "medicines": "No specific medicines are recommended for prehospital administration, focus on stabilizing the patient for transport.",
       "painkillers": "Avoid administering painkillers due to potential for masking symptoms or interfering with subsequent diagnosis."
     },
-    "name": "Mohamed Ali",
+    "name": "Sara Ali",
     "age": "32",
     "competence": "Concious",
-    "bpm": "112"
+    "bpm": "52"
   },
   "diagnosis": {
     "patient": {
@@ -29,11 +29,11 @@
     },
     "conversation_status": "DIAGNOSED",
     "diagnosed_by": "Mohamed Al Mehairbi",
-    "timestamp": "2025-01-26 19:13:55",
+    "timestamp": "2025-01-27 00:18:20",
     "_date": "25-01-2025",
     "status": "DIAGNOSED"
   },
   "priority": "high",
-  "timestamp": "2025-01-26 19:13:55",
+  "timestamp": "2025-01-27 00:18:20",
   "status": "diagnosed"
 }
