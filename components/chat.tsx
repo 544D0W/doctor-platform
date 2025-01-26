@@ -10,6 +10,7 @@ import {
   Brain, Send, AlertCircle, Clock, Loader2, 
   MessageSquare, Bot, Sparkles, User, Check 
 } from "lucide-react";
+import FormattedMedicalText from './FormattedMedicalText';
 
 interface Message {
   id: string;
@@ -114,7 +115,9 @@ export default function EmergencyChat({
                       <User className="w-4 h-4 text-rose-500" />
                     </div>
                   )}
-                  <MessageBubble message={message} />
+                  <div className="message-content">
+                    <FormattedMedicalText text={message.content} />
+                  </div>
                 </div>
               </motion.div>
             ))}

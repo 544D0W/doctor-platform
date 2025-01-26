@@ -1,3 +1,0 @@
-export default function ClinicalAssistantAI({ patient }: AIAssistantProps) {
-  // ... existing code ...
-} 
