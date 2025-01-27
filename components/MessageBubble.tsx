@@ -4,7 +4,7 @@ import { Brain, User } from 'lucide-react';
 
 interface MessageBubbleProps {
   message: {
-    content: string | React.ReactNode;
+    content: string;
     sender: string;
     timestamp: Date;
   };
@@ -14,6 +14,75 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
   const isAI = message.sender === 'ai';
   const isSystem = message.sender === 'system';
   const isDoctor = message.sender === 'doctor';
+
+  const formatMarkdownText = (text: string) => {
+    // Replace markdown bold syntax with proper HTML
+    return text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  };
+
+  const formatContent = (content: string) => {
+    // Split content by numbers followed by a dot and space
+    const parts = content.split(/(\d+\.\s)/);
+    
+    if (parts.length > 1) {
+      const items = [];
+      let currentItem = '';
+      
+      for (let i = 0; i < parts.length; i++) {
+        if (parts[i].match(/^\d+\.\s$/)) {
+          if (currentItem) {
+            items.push(currentItem.trim());
+          }
+          currentItem = parts[i];
+        } else {
+          currentItem += parts[i];
+        }
+      }
+      if (currentItem) {
+        items.push(currentItem.trim());
+      }
+
+      return (
+        <div className="space-y-2">
+          {items.map((item, index) => {
+            if (item.match(/^\d+\.\s/)) {
+              return (
+                <div key={index} className="flex items-start gap-2 pl-2">
+                  <span className="font-semibold min-w-[24px]">{item.match(/^\d+\./)[0]}</span>
+                  <span 
+                    dangerouslySetInnerHTML={{ 
+                      __html: formatMarkdownText(item.replace(/^\d+\.\s/, ''))
+                    }}
+                    className="flex-1"
+                  />
+                </div>
+              );
+            } else {
+              return (
+                <p 
+                  key={index} 
+                  className="leading-relaxed"
+                  dangerouslySetInnerHTML={{ 
+                    __html: formatMarkdownText(item)
+                  }}
+                />
+              );
+            }
+          })}
+        </div>
+      );
+    }
+
+    // If no list formatting needed, return as regular text with markdown parsing
+    return (
+      <p 
+        className="leading-relaxed"
+        dangerouslySetInnerHTML={{ 
+          __html: formatMarkdownText(content)
+        }}
+      />
+    );
+  };
 
   return (
     <motion.div
@@ -34,15 +103,11 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
         ${isSystem ? 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-600' : ''}
       `}>
         <div className="space-y-1">
-          {typeof message.content === 'string' ? (
-            <p className="leading-relaxed">{message.content}</p>
-          ) : (
-            message.content
-          )}
-          <div className={`text-xs ${isDoctor ? 'text-blue-100' : 'text-gray-500'}`}>
-            {new Date(message.timestamp).toLocaleTimeString([], { 
-              hour: '2-digit', 
-              minute: '2-digit' 
+          {formatContent(message.content)}
+          <div className={`text-xs mt-1 ${isDoctor ? 'text-blue-100' : 'text-gray-500'}`}>
+            {message.timestamp.toLocaleTimeString([], {
+              hour: '2-digit',
+              minute: '2-digit'
             })}
           </div>
         </div>
