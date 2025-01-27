@@ -2,14 +2,14 @@
   "doctors": [
     {
       "id": "1",
-      "name": "Dr. Sarah Johnson",
+      "name": "Dr. Mohamed Al Mehairbi",
       "specialization": "Cardiologist",
       "type": "Senior Specialist",
       "experience": "15 years",
-      "availability": "Busy",
+      "availability": "Available",
       "rating": 4.8,
       "patientsHandled": 1200,
-      "contact": "+971585794242",
+      "contact": "+971502211790",
       "email": "sarah.johnson@hospital.com",
       "imageUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah"
     },
