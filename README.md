@@ -47,6 +47,36 @@ Before running the project, ensure you have:
 ```bash
 git clone https://github.com/544D0W/doctor-platform
 cd doctor-platform
-npm install 
+npm install
+```
 
+2.Set up environment variables:
+```bash
+inside the  Directory
 
+echo "SAMBANOVA_API_KEY=your_api_key"  > .evn
+
+```
+Running the Project 🏃‍♂️
+
+1.Start the development server:
+```bash
+npm run dev
+# or
+yarn dev
+```
+2.Open your browser and navigate to:
+```bash
+http://localhost:3000
+```
+Project Structure 📁
+```bash
+lifelink/
+├── app/                 # Next.js app directory
+├── components/          # React components
+├── context/            # React context providers
+├── lib/                # Utility functions
+├── public/             # Static assets
+├── services/           # API services
+└── types/              # TypeScript types
+```
